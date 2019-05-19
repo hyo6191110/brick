@@ -25,17 +25,14 @@ public:
 	}
 	void initWithData(float x, float y);
 	bool isunbreakable() { return unbreakable; }
-	bool isitem()
-	{
-		if (dropitem)
-			return true;
-		else
-			return (cocos2d::random() % 6) > 4;
-	}
+	bool isdropitem() { return dropitem; }
 	int gethp() { return _hp; }
 	int getscore() { return _score; }
+	int gettype() { return _type; }
+	void settype(int t) { _type = t; }
 	void damaged();
 private:
+	int _type;
 	int _hp;
 	int _score;
 	bool unbreakable;

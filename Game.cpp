@@ -132,6 +132,28 @@ void Game::destroyball(Ball* ball)
 	V_balls.erase(std::find(V_balls.begin(), V_balls.end(), ball));
 }
 
+void Game::createBricksFromFile(const std::string& fileName)
+{
+
+	std::vector<BrickData*> V_brickdata;
+	getAllBrickWithFile(fileName, V_brickdata);
+
+	for (size_t i = 0; i < V_brickdata.size(); i++)
+	{
+		int type = V_brickdata.at(i)->getType();
+		int x = V_brickdata.at(i)->getX();
+		int y = V_brickdata.at(i)->getY();
+		if (type == 1)
+		{
+			auto brick = Brick::create("game\\brick_blue_L.png");
+			brick->initWithData(_centerX + x * brick->getContentSize().width, _centerY + y * brick->getContentSize().height);
+			brickcount++;
+			this->addChild(brick);
+		}
+
+	}
+}
+
 void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode code, Event* event)
 {
 
@@ -314,23 +336,7 @@ void Game::createClassicLevel()
 
 	createball();
 
-	std::vector<BrickData*> V_brickdata;
-	getAllBrickWithFile("levels\\exp.json", V_brickdata);
-
-	for(int i=0;i<V_brickdata.size();i++)
-	{
-		int type = V_brickdata.at(i)->getType();
-		int x = V_brickdata.at(i)->getX();
-		int y = V_brickdata.at(i)->getY();
-		if (type == 1)
-		{
-			auto brick = Brick::create("game\\brick_blue_L.png");
-			brick->initWithData(_centerX + x * brick->getContentSize().width, _centerY + y * brick->getContentSize().height);
-			brickcount++;
-			this->addChild(brick);
-		}
-
-	}
+	createBricksFromFile("levels\\exp.json");
 
 	auto listener = EventListenerPhysicsContact::create();
 	listener->onContactPostSolve = [=](PhysicsContact& contact,const PhysicsContactPostSolve& solve) {
@@ -347,7 +353,7 @@ void Game::createClassicLevel()
 					brick->damaged();
 					if (brick->gethp() == 0)
 					{
-						if (brick->isitem())
+						if (brick->isdropitem())
 						{
 							//drop item
 						}

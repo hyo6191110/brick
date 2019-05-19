@@ -23,6 +23,7 @@ public:
 public:
 	void createball(float x=0,float y=0);
 	void destroyball(Ball* ball);
+	void createBricksFromFile(const std::string& fileName);
 public:
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
