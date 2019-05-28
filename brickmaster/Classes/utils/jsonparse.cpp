@@ -15,7 +15,7 @@ bool getAllBrickWithFile(const std::string& fileName, std::vector<BrickData*>& v
 	}
 
 	const rapidjson::Value& V_brick = document["bricks"];
-	for (int i = 0; i < V_brick.Size(); i++)
+	for (size_t i = 0; i < V_brick.Size(); i++)
 	{
 		int type = V_brick[i]["type"].GetInt();
 		int x = V_brick[i]["x"].GetInt();

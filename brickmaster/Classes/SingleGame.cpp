@@ -2,8 +2,8 @@
 #include "ui/CocosGUI.h"
 USING_NS_CC;
 using namespace ui;
-#include "Level.h"
-#include "LevelDesigner.h"
+#include "scenes/Level.h"
+#include "scenes/LevelDesigner.h"
 
 Scene* SingleGame::createScene()
 {

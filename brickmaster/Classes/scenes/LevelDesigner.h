@@ -10,7 +10,7 @@
 #include"json/prettywriter.h"
 #include"json/stringbuffer.h"
 
-#include"Brick.h"
+#include"models/Brick.h"
 
 class LevelDesigner :public cocos2d::Layer
 {

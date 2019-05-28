@@ -3,12 +3,12 @@
 #include "cocos2d.h"
 #include "Level.h"
 
-#include "Plate.h"
-#include "Ball.h"
-#include "Brick.h"
-#include "BrickItem.h"
+#include "models/Plate.h"
+#include "models/Ball.h"
+#include "models/Brick.h"
+#include "models/BrickItem.h"
 
-#include"jsonparse.h"
+#include"utils/jsonparse.h"
 
 //为各种游戏元素给一个特有的标签用于识别
 const int BALL_TAG = 1;
