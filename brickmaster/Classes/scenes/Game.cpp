@@ -4,102 +4,28 @@ USING_NS_CC;
 Scene*  Game::createScene(int life, int level)
 {
 	auto scene = Scene::createWithPhysics();
-	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
 	auto layer = Game::create();
+
 	layer->_life = life;
 	layer->_level = level;
 	layer->_player1->setLife(life);
 	layer->initAfter();
+
 	scene->addChild(layer);
 	return scene;
 }
 
 void Game::Closethis(Ref* pSender)
 {
-	this->unscheduleUpdate();
+	this->unscheduleAllCallbacks();
     //SpriteFrameCache::getInstance->removeUnusedSpriteFrames();
     //SpriteFrameCache::getInstance->destroyInstance();
     //this->_eventDispatcher->removeAllEventListeners();
     Director::getInstance()->popScene();
 
 }
-
-void Game::updateballspeed()
-{
-	//1.保持球的速度
-	//2.更新球的速度实现动态难度
-	if (isRoundStarted)
-		for (auto ball : V_balls)
-		{
-			if (ball->getPhysicsBody()->getVelocity().getLength() != ball->getSpeed())
-			{
-				//log("%f", ball->getPhysicsBody()->getVelocity().getLength());
-				auto velocity=ball->getPhysicsBody()->getVelocity()/ ball->getPhysicsBody()->getVelocity().getLength()*ball->getSpeed();
-				ball->getPhysicsBody()->setVelocity(velocity);
-			}
-			if (!_gamescreen.containsPoint(ball->getPosition()))
-			{
-				balltodestroy = ball;
-			}
-		}
-}
-
-void Game::collisionDetection(Plate* player)
-{
-	for (auto iter = V_items.begin(); iter != V_items.end(); )
-	{
-		auto it = *iter;
-		if (it->getPositionY() <= 0 || it->getPositionY() >= _gamescreenHeight)
-		{
-			iter = V_items.erase(iter);
-			this->removeChild(it);
-		}
-		else if (player->getBoundingBox().intersectsRect(it->getBoundingBox()))
-		{
-			switch (it->getItemtype())
-			{
-			case BallPlus:
-			{
-				if (V_balls.size() > 2 || !isRoundStarted)
-					break;
-				createballwithBall(V_balls.back());
-				break;
-			}
-			case LifeRecover:
-			{
-				player->recover();
-				_showlife->setString(StringUtils::format("%d", player->getLife()));
-				break;
-			}
-			case Expande:
-			{
-				player->setScaleX(1.5f);
-				break;
-			}
-			case Shrink:
-			{
-				player->setScaleX(0.6f);
-				break;
-			}
-			case Points:
-			{
-				_score += 50;
-				_showscore->setString(StringUtils::format("%d", _score));
-				break;
-			}
-			}
-
-			iter = V_items.erase(iter);
-			this->removeChild(it);
-		}
-		else
-		{
-			iter++;
-		}
-	}
-}
-
 void Game::update(float delta)
 {
 	//1.通用
@@ -108,6 +34,7 @@ void Game::update(float delta)
 	//更新球速
 	updateballspeed();
 	//发射前让球紧跟板移动
+	if (!V_balls.empty())
 	if (!isRoundStarted)
 	{
 		if (V_balls.back()->getPositionX() != _player1->getPositionX())
@@ -133,6 +60,7 @@ void Game::update(float delta)
 
 void Game::gameOver(bool isWin)
 {
+	isGameOver = true;
 	for (auto it = V_items.begin(); it != V_items.end();)
 	{
 		this->removeChild(*it);
@@ -145,24 +73,26 @@ void Game::gameOver(bool isWin)
 	}
 	auto board = Sprite::create("game\\winlose_board.png");
 	board->setPosition(_centerX, _centerY);
+	board->setLocalZOrder(5);
 	addChild(board);
 	if (isWin)
 	{
-		auto show = Label::createWithTTF("You win!","fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+		auto show = Label::createWithTTF("You win!","fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 		show->setPosition(_centerX, _centerY);
+		show->setLocalZOrder(6);
 		addChild(show);
 		//pop board:back,retry
 		//write to user file
 	}
 	else
 	{
-		auto show = Label::createWithTTF("You lose!", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+		auto show = Label::createWithTTF("You lose!", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 		show->setPosition(_centerX, _centerY);
+		show->setLocalZOrder(6);
 		addChild(show);
 		//pop board:back,retry
 		//write to user file
 	}
-
 }
 
 void Game::createPlayerSide(int side, Plate*& player, Deadzone*& deadzone)
@@ -192,12 +122,14 @@ void Game::createPlayerSide(int side, Plate*& player, Deadzone*& deadzone)
 }
 void Game::createballwithBall(Ball* origin)
 {
-	auto _ball = Ball::create("game\\ball_L.png");
+	auto _ball = Ball::create("game\\ball_M.png");
 	float x = origin->getPositionX();
 	float y = origin->getPositionY();
 	_ball->initWithData(x, y);
 	_ball->setTag(1);
 	_ball->setPlateBelongto(origin->getPlateBelongto());
+	_ball->setRadius(origin->getRadius());
+	_ball->setScale(_ball->getRadius());
 	this->addChild(_ball);
 	V_balls.push_back(_ball);
 	_ball->getPhysicsBody()->setVelocity(origin->getPhysicsBody()->getVelocity());
@@ -205,9 +137,13 @@ void Game::createballwithBall(Ball* origin)
 
 void Game::createballforPlate(Plate* owner)
 {
-	auto _ball = Ball::create("game\\ball_L.png");
+	auto _ball = Ball::create("game\\ball_M.png");
 	float x = owner->getPositionX();
-	float y = owner->getPositionY() + this->_player1->getContentSize().height / 2 + _ball->getContentSize().height / 2;
+	float y;
+	if(owner->getPositionY()<500)
+	    y = owner->getPositionY() + this->_player1->getContentSize().height / 2 + _ball->getContentSize().height / 2;
+	else
+		y = owner->getPositionY() - this->_player1->getContentSize().height / 2 - _ball->getContentSize().height / 2;
 	_ball->initWithData(x, y);
 	_ball->setTag(1);
 	_ball->getPhysicsBody()->setDynamic(false);
@@ -234,24 +170,24 @@ void Game::createBricksFromFile(const std::string& fileName)
 		int x = V_brickdata.at(i)->getX();
 		int y = V_brickdata.at(i)->getY();
 		auto filename = StringUtils::format("game//brick_%d.png", type);
-		if (type <50)
+		if (type < 50)
 		{
-			auto brick = Brick::create(filename,type);
+			auto brick = Brick::create(filename, type);
 			brick->initWithData(x, y);
 			brickcount++;
 			this->addChild(brick);
 		}
-		else 
+		else
 		{
 			if (type == 51)
 			{
-				auto brick = Brick::create(filename, 1, 10, true, false);
+				auto brick = Brick::create(filename, 1, 0, true, false);
 				brick->initWithData(x, y);
 				this->addChild(brick);
 			}
 			else if (type == 52)
 			{
-				auto brick = Brick::create(filename, 1, 10, false, true);
+				auto brick = Brick::create(filename, 1, 1, false, true);
 				brick->initWithData(x, y);
 				brick->setbrickcount(false);
 				this->addChild(brick);
@@ -279,6 +215,7 @@ void Game::createBrickItem(float x, float y, int side)
 	this->addChild(item);
 	V_items.push_back(item);
 	item->runAction(MoveTo::create(distance / item->getDropspeed(), Vec2(x, y_destination)));
+	LOG_INFO("Item created!");
 }
 
 bool Game::init()
@@ -290,6 +227,9 @@ bool Game::init()
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	auto bg = Sprite::create(_backgroundfile);
+	bg->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+	addChild(bg);
 	//1.创建退出按钮
 	auto closeItem = MenuItemImage::create(
 		"back.png",
@@ -338,7 +278,7 @@ bool Game::init()
 	this->scheduleUpdate();
 
 	auto listener = EventListenerPhysicsContact::create();
-	listener->onContactPostSolve = CC_CALLBACK_2(Game::onContactPostSolve, this);
+	listener->onContactBegin = CC_CALLBACK_1(Game::onContactBegin, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 
 	auto listener2 = EventListenerKeyboard::create();
@@ -355,38 +295,65 @@ void Game::createHUD()
 	float x = _gamescreen.getMinX() / 2;
 	float y = _gamescreen.getMaxY();
 
-	auto tlife = Label::createWithTTF("Life:", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
-	auto str = StringUtils::format("%d", _life);
-	_showlife = Label::createWithTTF(str, "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	tlife->setPosition(x, y - 100);
-	_showlife->setPosition(x, y - 200);
-	this->addChild(tlife);
-	this->addChild(_showlife);
+	_showlevel = Label::createWithTTF(StringUtils::format("Level %d", _level), "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	_showlevel->setPosition(x, y - 50);
+	this->addChild(_showlevel);
 
-	auto tscore = Label::createWithTTF("Score:", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	auto tscore = Label::createWithTTF("Score:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	tscore->setColor(Color3B::BLACK);
 	auto str2 = StringUtils::format("%d", _score);
-	_showscore = Label::createWithTTF(str2, "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	tscore->setPosition(x, y - 300);
-	_showscore->setPosition(x, y - 400);
+	_showscore = Label::createWithTTF(str2, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	tscore->setPosition(x, y - 150);
+	_showscore->setPosition(x, y - 200);
 	this->addChild(tscore);
 	this->addChild(_showscore);
 
-	_showlevel = Label::createWithTTF(StringUtils::format("Level %d", _level), "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
-	_showlevel->setPosition(x, y - 500);
-	this->addChild(_showlevel);
+	auto tlife = Label::createWithTTF("Life:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	tlife->setColor(Color3B::BLACK);
+	auto str = StringUtils::format("%d", _life);
+	_showlife = Label::createWithTTF(str, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	tlife->setPosition(x, y - 300);
+	_showlife->setPosition(x, y - 350);
+	this->addChild(tlife);
+	this->addChild(_showlife);
+
+	auto news = Sprite::create("game/game_info.png");
+	news->setPosition(x, y - 575);
+	addChild(news);
+	_show_game_info = Label::createWithTTF("Nothing special", "fonts\\BRITANIC.ttf", 24, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_show_game_info->setPosition(x, y - 575);
+	_show_game_info->setColor(Color3B::BLACK);
+	addChild(_show_game_info);
+
+	auto ball = Sprite::create("game/ball_score.png");
+	_show_point_multi = Label::createWithTTF(StringUtils::format("%d", _point_multiple),
+		"fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	ball->setPosition(x, y - 680);
+	_show_point_multi->setPosition(x, y - 680);
+	_show_point_multi->setColor(Color3B::BLACK);
+	addChild(ball);
+	addChild(_show_point_multi);
+
+	auto brick = Sprite::create("game/brick_count.png");
+	_show_brickcount = Label::createWithTTF(StringUtils::format("%d/%d", brickcount,allbrickcount),
+		"fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	brick->setPosition(x, y - 800);
+	_show_brickcount->setPosition(x, y - 800);
+	_show_brickcount->setColor(Color3B::BLACK);
+	addChild(brick);
+	addChild(_show_brickcount);
 
 	createHUDMode();
 }
 void Game::initAfter()
 {
-	createHUD();
 	std::string LevelFile = StringUtils::format("levels\\level_%d.json", _level);
 	createBricksFromFile(LevelFile);
-}
-void Game::initMode()
-{
+	allbrickcount = brickcount;
 
+	createHUD();
 }
+
 void Game::updateMode()
 {
 	if (balltodestroy)
@@ -395,6 +362,8 @@ void Game::updateMode()
 		destroyball(balltodestroy);
 		if (V_balls.empty())
 		{
+			_point_multiple = 10;
+			_show_point_multi->setString("10");
 			player->damaged();
 			_showlife->setString(StringUtils::format("%d", _player1->getLife()));
 			if (_player1->getLife() == 0)
@@ -473,7 +442,7 @@ void Game::onKeyReleased(cocos2d::EventKeyboard::KeyCode code, Event* event)
 	}
 }
 
-void Game::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostSolve& solve)
+bool Game::onContactBegin(PhysicsContact& contact)
 {
 	auto SA = contact.getShapeA()->getBody()->getNode();
 	auto SB = contact.getShapeB()->getBody()->getNode();
@@ -483,15 +452,16 @@ void Game::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostS
 		{
 			auto ball= dynamic_cast<Ball*>(SA);
 			auto brick = dynamic_cast<Brick*>(SB);
-			_score += 1;
-			_showscore->setString(StringUtils::format("%d", _score));
 			if (!brick->isunbreakable())
 			{
 				brick->damaged();
 				if (brick->gethp() == 0)
 				{
-					_score += brick->getscore();
+					_score += brick->getscore()*_point_multiple;
+					_point_multiple += 2;
+					_show_point_multi->setString(StringUtils::format("%d", _point_multiple));
 					_showscore->setString(StringUtils::format("%d", _score));
+
 					if (brick->isdropitem())
 					{
 						int side = 1;
@@ -500,9 +470,20 @@ void Game::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostS
 						createBrickItem(brick->getPositionX(), brick->getPositionY(),side);
 					}
 					if (brick->isbrickcount())
+					{
 						brickcount--;
-					this->removeChild(SB);
+						_show_brickcount->setString(StringUtils::format("%d/%d", brickcount, allbrickcount));
+					}	
 
+					recordBrick(brick);
+
+					this->removeChild(brick);
+					LOG_INFO("Brick destoyed!");
+					
+				}
+				else
+				{
+					LOG_INFO(StringUtils::format("Brick HP:%d/%d", brick->gethp(),brick->getMaxhp()));
 				}
 			}
 
@@ -521,4 +502,144 @@ void Game::onContactPostSolve(PhysicsContact& contact, const PhysicsContactPostS
 			dynamic_cast<Ball*>(SB)->setPlateBelongto(dynamic_cast<Plate*>(SA));
 		}
 	}
+	return true;
+}
+
+void Game::updateballspeed()
+{
+	//1.保持球的速度
+	//2.更新球的速度实现动态难度
+	if (isRoundStarted)
+		for (auto ball : V_balls)
+		{
+			if (ball->getPhysicsBody()->getVelocity().getLength() != ball->getSpeed())
+			{
+				auto velocity = ball->getPhysicsBody()->getVelocity() / ball->getPhysicsBody()->getVelocity().getLength()*ball->getSpeed();
+				ball->getPhysicsBody()->setVelocity(velocity);
+			}
+			if (!_gamescreen.containsPoint(ball->getPosition()))
+			{
+				balltodestroy = ball;
+			}
+		}
+}
+
+void Game::collisionDetection(Plate* player)
+{
+	for (auto iter = V_items.begin(); iter != V_items.end(); )
+	{
+		auto it = *iter;
+		if (it->getPositionY() <= 0 || it->getPositionY() >= _gamescreenHeight)
+		{
+			iter = V_items.erase(iter);
+			this->removeChild(it);
+		}
+		else if (player->getBoundingBox().intersectsRect(it->getBoundingBox()))
+		{
+			switch (it->getItemtype())
+			{
+			case BallPlus:
+			{
+				if (V_balls.size() > 2 || !isRoundStarted)
+					break;
+				createballwithBall(V_balls.back());
+				LOG_INFO(StringUtils::format("Ball:%d", V_balls.size()));
+				break;
+			}
+			case LifeRecover:
+			{
+				if (_life > 0)
+				{
+					player->recover();
+					_showlife->setString(StringUtils::format("%d", player->getLife()));
+					LOG_INFO("Life Recover:+1");
+					break;
+				}
+			}
+			case Expande:
+			{
+				player->expand();
+				LOG_INFO(StringUtils::format("Expand:length %.1f",player->getScaleX()));
+				break;
+			}
+			case Shrink:
+			{
+				player->shrink();
+				LOG_INFO(StringUtils::format("Shrink:length %.1f", player->getScaleX()));
+				break;
+			}
+			case BallSpeedUp:
+			{
+				for (auto it : V_balls)
+				{
+					it->speedUp();
+				}
+				LOG_INFO(StringUtils::format("Ball SpeedUP\n %.1f", V_balls.back()->getSpeed()));
+				break;
+			}
+			case BallSpeedDown:
+			{
+				for (auto it : V_balls)
+				{
+					it->speedDown();
+				}
+				LOG_INFO(StringUtils::format("Ball SpeedDOWN\n %.1f", V_balls.back()->getSpeed()));
+				break;
+			}
+			case PlateSpeedUp:
+			{
+				player->speedUp();
+				LOG_INFO(StringUtils::format("Player SpeedUP\n %.1f", player->getVelocity()));
+				break;
+			}
+			case PlateSpeedDown:
+			{
+				player->speedDown();
+				LOG_INFO(StringUtils::format("Player SpeedDOWN\n %.1f", player->getVelocity()));
+				break;
+			}
+			case BallLarger:
+			{
+				for (auto it : V_balls)
+				{
+					it->larger();
+				}
+				LOG_INFO(StringUtils::format("Bigger ball: %.1f", V_balls.back()->getScale()));
+				break;
+			}
+			case BallSmaller:
+			{
+				for (auto it : V_balls)
+				{
+					it->smaller();
+				}
+				LOG_INFO(StringUtils::format("Smaller ball: %.1f", V_balls.back()->getScale()));
+				break;
+			}
+			case Points:
+			{
+				_score += 50;
+				_showscore->setString(StringUtils::format("%d", _score));
+				LOG_INFO("Bonus:Point+50");
+				break;
+			}
+			}
+
+			iter = V_items.erase(iter);
+			this->removeChild(it);
+		}
+		else
+		{
+			iter++;
+		}
+	}
+}
+
+void Game::recordBrick(Brick* brick)
+{
+
+}
+void Game::initMode()
+{
+
 }

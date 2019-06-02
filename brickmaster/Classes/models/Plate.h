@@ -31,6 +31,7 @@ public:
 	void stopLeft();
 	void moveRight();
 	void stopRight();
+	void stopMoving();
 
 	float getVelocity() { return _velocity; }
 	void  setVelocityMultiple(float multiply) { _velocity *= multiply; }
@@ -40,12 +41,19 @@ public:
 	void  setLife(int hp) { _life = hp; }
 	void  recover() { _life++; }
 	void  damaged() { _life--; }
+	void  speedUp() { if(_velocity<900)_velocity += 100; }
+	void  speedDown() { if (_velocity > 300)_velocity -= 100; }
+
+	bool checkLengthIntergrity() { return _length > 0.4&&_length < 1.8; }
+	void expand();
+	void shrink();
 private:
 	float _velocity=500;
 	float _startPosition=0;
-	bool _movingleft=false;
-	bool _movingright = false;
-	int  _life;
+	bool  _movingleft=false;
+	bool  _movingright = false;
+	int   _life;
+	float _length = 1.0;
 };
 
 class Deadzone :public cocos2d::Sprite

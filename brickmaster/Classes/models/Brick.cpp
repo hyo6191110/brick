@@ -16,6 +16,7 @@ void Brick::initWithData(float x, float y )
 
 	brick->setPosition(x,y);
 	brick->setTag(2);
+	_max_hp = _hp;
 }
 
 void Brick::damaged()

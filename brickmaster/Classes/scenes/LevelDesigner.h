@@ -2,16 +2,16 @@
 #define __DESIGNER_H__
 
 #include "cocos2d.h"
-
+#include"json/reader.h"
 #include"json/writer.h"
 #include"json/rapidjson.h"
 #include"json/document.h"
 #include"json/filewritestream.h"
 #include"json/prettywriter.h"
 #include"json/stringbuffer.h"
-
+#include<fstream>
 #include"models/Brick.h"
-
+#include"utils/jsonparse.h"
 class LevelDesigner :public cocos2d::Layer
 {
 public:
@@ -20,6 +20,7 @@ public:
 	virtual bool init();
 	void Closethis(cocos2d::Ref* pSender);
 	void WritetoFile(cocos2d::Ref* pSender);
+	void ReadfromFile(cocos2d::Ref* pSender);
 private:
 	float _designscreenWidth, _designscreenHeight;
 	float _centerX;

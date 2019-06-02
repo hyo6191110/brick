@@ -1,7 +1,6 @@
 #include "LevelDesigner.h"
 USING_NS_CC;
 using namespace rapidjson;
-#include<fstream>
 using namespace std;
 Scene* LevelDesigner::createScene()
 {
@@ -32,10 +31,11 @@ void LevelDesigner::addbrick(int type, float x, float y)
 
 void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 {
+	bool rewrite=false;
 	if (FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/"+_fileName))
 	{
-		_showsavelog->setString("Existed,try another name");
-		return;
+		_showsavelog->setString("Rewrite:"+_fileName);
+		rewrite = true;
 	}
 	Document document;
 	document.SetObject();
@@ -59,9 +59,32 @@ void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 	outfile.open(fullPath);
 	outfile << buffer.GetString();
 	outfile.close();
-	_showsavelog->setString("Successfully saved");
+	if(rewrite==false)
+	    _showsavelog->setString("Successfully saved");
+	else
+		_showsavelog->setString("Successfully rewrited");
 }
+void LevelDesigner::ReadfromFile(cocos2d::Ref* pSender)
+{
+	if (!FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/" + _fileName))
+	{
+		_showsavelog->setString("No file,try another name");
+		return;
+	}
+	for (auto it : vec_brick)
+	{
+		this->removeChild(it);
+	}
+	vec_brick.clear();
 
+	vector<BrickData*> vec_data;
+	getAllBrickWithFile("levels/"+_fileName,vec_data);
+	for (auto it : vec_data)
+	{
+		addbrick(it->getType(),it->getX(),it->getY());
+	}
+	_showsavelog->setString("Successfully read");
+}
 
 bool LevelDesigner::init()
 {
@@ -123,12 +146,17 @@ bool LevelDesigner::init()
 	float y = origin.y + closeItem->getContentSize().height / 2;
 	closeItem->setPosition(Vec2(x, y));
 
+	auto loadlable = Label::createWithTTF("Load", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	auto loadItem = MenuItemLabel::create(loadlable,
+		CC_CALLBACK_1(LevelDesigner::ReadfromFile, this));
+	loadItem->setPosition(info->getContentSize().width / 2, 120);
+
 	auto savelable= Label::createWithTTF("Save", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto saveItem = MenuItemLabel::create(savelable,
 		CC_CALLBACK_1(LevelDesigner::WritetoFile,this));
 	saveItem->setPosition(info->getContentSize().width/2,90);
 
-	auto menu = Menu::create(closeItem,saveItem,addItem,minusItem, NULL);
+	auto menu = Menu::create(closeItem,loadItem,saveItem,addItem,minusItem, NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 

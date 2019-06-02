@@ -52,3 +52,20 @@ void  Ball::shootBall(Plate* shooter)
 		this->getPhysicsBody()->setVelocity(velocity);
 	}
 }
+
+void  Ball::larger()
+{
+	if (checkRadiusIntergrity())
+	{
+		_radius += 0.2f;
+		setScale(_radius);
+	}
+}
+void  Ball::smaller()
+{
+	if (checkRadiusIntergrity())
+	{
+		_radius -= 0.2f;
+		setScale(_radius);
+	}
+}

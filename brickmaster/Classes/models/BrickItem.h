@@ -9,6 +9,12 @@ enum ItemType
 	LifeRecover,
 	Expande,
 	Shrink,
+	BallSpeedUp,
+	BallSpeedDown,
+	PlateSpeedUp,
+	PlateSpeedDown,
+	BallLarger,
+	BallSmaller,
 	Points
 };
 

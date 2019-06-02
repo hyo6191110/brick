@@ -21,6 +21,7 @@ const int WALL_TAG = 6;
 class Game :public cocos2d::Layer
 {
 protected:
+	std::string _backgroundfile="background/background_01.jpg";
 	//分值数据及显示
 	int _level;
 	int _life;
@@ -44,6 +45,13 @@ protected:
 	std::vector<Ball*> V_balls;
 	std::vector<BrickItem*> V_items;
 	int brickcount = 0;
+	int allbrickcount;
+	int _point_multiple=10;
+	cocos2d::Label* _show_brickcount;
+	cocos2d::Label* _show_point_multi;
+	cocos2d::Label* _show_game_info;
+public:
+	void LOG_INFO(const std::string& str) { _show_game_info->setString(str); }
 public:
 	virtual void initMode();
 	virtual void updateMode();
@@ -66,11 +74,12 @@ public:
 	void destroyball(Ball* ball);
 	void createBricksFromFile(const std::string& fileName);
 	void createBrickItem(float x, float y, int side);
+	virtual void recordBrick(Brick* brick);
 	//事件回调函数
 	void Closethis(cocos2d::Ref* pSender);
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
-	void onContactPostSolve(cocos2d::PhysicsContact& contact, const cocos2d::PhysicsContactPostSolve& solve);
+	bool onContactBegin(cocos2d::PhysicsContact& contact);
 };
 
 #endif

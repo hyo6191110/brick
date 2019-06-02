@@ -84,7 +84,7 @@ void Level::openlevel(cocos2d::Ref* pSender)
 	case GameMode::Pong:
 		scene = GameModePong::createScenePong(_currentlife, _currentlevel); break;
 	case GameMode::Timelimit:
-		scene = GameModeTimelimit::createSceneTimelimit(_currentlife, _currentlevel); break;
+		scene = GameModeTimelimit::createSceneTimelimit(_currentlevel,90); break;
 	}
 	Director::getInstance()->pushScene(scene);
 

@@ -50,7 +50,34 @@ void Plate::stopRight()
 	setStartPosition(getPositionX());
 	setMovingRight(false);
 }
-
+void Plate::stopMoving()
+{
+	_movingleft = false;
+	_movingright = false;
+	getPhysicsBody()->setVelocity(Vec2::ZERO);
+	setStartPosition(getPositionX());
+}
+void Plate::expand()
+{
+	if (checkLengthIntergrity())
+	{
+		_length += 0.2f;
+		setScaleX(_length);
+		if (_velocity > 300)
+			_velocity -= 50;
+	}
+}
+void Plate::shrink()
+{
+	if (checkLengthIntergrity())
+	{
+		_length -= 0.2f;
+		setScaleX(_length);
+		if (_velocity < 900)
+			_velocity += 50;
+	}
+}
+//deadzone
 void Deadzone::initWithData(float x, float y)
 {
 	this->setPosition(x, y);

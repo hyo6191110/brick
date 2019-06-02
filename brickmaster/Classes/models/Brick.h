@@ -2,10 +2,11 @@
 #define __BRICK_H__
 
 #include "cocos2d.h"
+#include "utils/jsonparse.h"
 class Brick :public cocos2d::Sprite
 {
 public:
-	static Brick* create(const std::string& filename, int hp = 1, int s = 10, bool unbreak = false, bool item = false)
+	static Brick* create(const std::string& filename, int hp = 1, int s = 1, bool unbreak = false, bool item = false)
 	{
 		auto sprite = new Brick();
 
@@ -28,6 +29,7 @@ public:
 	bool isbrickcount() { return brickcount; }
 	void setbrickcount(bool b) { brickcount = b; }
 	int gethp() { return _hp; }
+	int getMaxhp() { return _max_hp; }
 	int getscore() { return _score; }
 	int gettype() { return _type; }
 	void settype(int t) { _type = t; }
@@ -35,6 +37,7 @@ public:
 private:
 	int _type;
 	int _hp;
+	int _max_hp;
 	int _score;
 	bool unbreakable;
 	bool dropitem;
