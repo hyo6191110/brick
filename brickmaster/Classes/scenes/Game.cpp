@@ -20,7 +20,7 @@ Scene*  Game::createScene(int life, int level)
 void Game::Closethis(Ref* pSender)
 {
 	this->unscheduleAllCallbacks();
-    //SpriteFrameCache::getInstance->removeUnusedSpriteFrames();
+    SpriteFrameCache::getInstance()->removeSpriteFrames();
     //SpriteFrameCache::getInstance->destroyInstance();
     //this->_eventDispatcher->removeAllEventListeners();
     Director::getInstance()->popScene();
@@ -122,7 +122,7 @@ void Game::createPlayerSide(int side, Plate*& player, Deadzone*& deadzone)
 }
 void Game::createballwithBall(Ball* origin)
 {
-	auto _ball = Ball::create("game\\ball_M.png");
+	auto _ball = Ball::create("ball_M.png");
 	float x = origin->getPositionX();
 	float y = origin->getPositionY();
 	_ball->initWithData(x, y);
@@ -137,7 +137,7 @@ void Game::createballwithBall(Ball* origin)
 
 void Game::createballforPlate(Plate* owner)
 {
-	auto _ball = Ball::create("game\\ball_M.png");
+	auto _ball = Ball::create("ball_M.png");
 	float x = owner->getPositionX();
 	float y;
 	if(owner->getPositionY()<500)
@@ -169,7 +169,7 @@ void Game::createBricksFromFile(const std::string& fileName)
 		int type = V_brickdata.at(i)->getType();
 		int x = V_brickdata.at(i)->getX();
 		int y = V_brickdata.at(i)->getY();
-		auto filename = StringUtils::format("game//brick_%d.png", type);
+		auto filename = StringUtils::format("brick_%d.png", type);
 		if (type < 50)
 		{
 			auto brick = Brick::create(filename, type);
@@ -208,7 +208,7 @@ void Game::createBrickItem(float x, float y, int side)
 		return;
 
 	int i_type = random() % BrickItem::getMaxitemtype() + 1;
-	auto fileName = StringUtils::format("game\\item_%d.png", i_type);
+	auto fileName = StringUtils::format("item_%d.png", i_type);
 	auto item = BrickItem::create(fileName);
 	item->initWithData(x,y);
 	item->setItemType(static_cast<ItemType>(i_type - 1));
@@ -230,6 +230,7 @@ bool Game::init()
 	auto bg = Sprite::create(_backgroundfile);
 	bg->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	addChild(bg);
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("game/game_sprite_default.plist","game/game_sprite_default.png");
 	//1.创建退出按钮
 	auto closeItem = MenuItemImage::create(
 		"back.png",
@@ -293,10 +294,15 @@ void Game::createHUD()
 {
 	//显示数值数据
 	float x = _gamescreen.getMinX() / 2;
-	float y = _gamescreen.getMaxY();
+	float y = _gamescreen.getMaxY();\
 
-	_showlevel = Label::createWithTTF(StringUtils::format("Level %d", _level), "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
-	_showlevel->setPosition(x, y - 50);
+	std::string level_str;
+	if (_level > 10000)
+		level_str = StringUtils::format("User's Level\n%d", _level-10000);
+	else
+		level_str = StringUtils::format("Level %d", _level);
+	_showlevel = Label::createWithTTF(level_str, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	_showlevel->setPosition(x, y - 75);
 	this->addChild(_showlevel);
 
 	auto tscore = Label::createWithTTF("Score:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
@@ -347,7 +353,11 @@ void Game::createHUD()
 }
 void Game::initAfter()
 {
-	std::string LevelFile = StringUtils::format("levels\\level_%d.json", _level);
+	std::string LevelFile;
+	if(_level>10000)
+		LevelFile = StringUtils::format("levels/user_levels/level_%d.json", _level-10000);
+	else
+	    LevelFile = StringUtils::format("levels/default_levels/level_%d.json", _level);
 	createBricksFromFile(LevelFile);
 	allbrickcount = brickcount;
 
@@ -548,13 +558,19 @@ void Game::collisionDetection(Plate* player)
 			}
 			case LifeRecover:
 			{
-				if (_life > 0)
+				if (islife)
 				{
 					player->recover();
 					_showlife->setString(StringUtils::format("%d", player->getLife()));
 					LOG_INFO("Life Recover:+1");
 					break;
 				}
+				else
+				{
+					recoverTime();
+					break;
+				}
+					
 			}
 			case Expande:
 			{
@@ -640,6 +656,10 @@ void Game::recordBrick(Brick* brick)
 
 }
 void Game::initMode()
+{
+
+}
+void Game::recoverTime()
 {
 
 }

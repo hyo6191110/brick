@@ -18,12 +18,9 @@ Scene* MenuLayer::createScene()
 
 void MenuLayer::Closethis(Ref* pSender)
 {
-	//this->unscheduleUpdate();
-	//SpriteFrameCache::getInstance->removeUnusedSpriteFrames();
-	//SpriteFrameCache::getInstance->destroyInstance();
-	//this->_eventDispatcher->removeAllEventListeners();
+    SpriteFrameCache::getInstance()->destroyInstance();
+	this->_eventDispatcher->removeAllEventListeners();
 	Director::getInstance()->end();
-
 }
 
 void MenuLayer::SwitchtoSingle(cocos2d::Ref* pSender)
@@ -72,7 +69,7 @@ bool MenuLayer::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto bg = Sprite::create("background_menu_02.png");
+	auto bg = Sprite::create("background/background_menu_02.png");
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(bg);
 

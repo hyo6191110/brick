@@ -63,8 +63,6 @@ void Plate::expand()
 	{
 		_length += 0.2f;
 		setScaleX(_length);
-		if (_velocity > 300)
-			_velocity -= 50;
 	}
 }
 void Plate::shrink()
@@ -86,4 +84,40 @@ void Deadzone::initWithData(float x, float y)
 	body_1->setContactTestBitmask(0x01);
 	body_1->setCollisionBitmask(0x01);
 	this->setPhysicsBody(body_1);
+}
+void Plate::setAIDifficulty(int d)
+{
+	switch (d)
+	{
+	case 1:
+	{
+		_velocity = 300;
+		break;
+	}
+	case 2:
+	{
+		_velocity = 400;
+		break;
+	}
+	case 3:
+	{
+		_velocity = 500;
+		break;
+	}
+	case 4:
+	{
+		_velocity = 650;
+		setScaleX(1.05f);
+		break;
+	}
+	case 5:
+	{
+		_velocity = 750;
+		setScaleX(1.15f);
+		break;
+	}
+	}
+	auto player = Sprite::create(StringUtils::format("game/oppo_%d.png", d));
+	auto player_texture = player->getTexture();
+	this->setTexture(player_texture);
 }

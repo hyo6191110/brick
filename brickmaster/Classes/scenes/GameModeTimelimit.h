@@ -15,6 +15,7 @@ public:
 	virtual void updateMode() override;
 	virtual void createHUDMode() override;
 	virtual void recordBrick(Brick* brick) override;
+	virtual void recoverTime() override;
 	static cocos2d::Scene* createSceneTimelimit( int level,int time);
 	void updateTime(float delta);
 	void generateBricks();

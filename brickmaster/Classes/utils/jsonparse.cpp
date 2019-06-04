@@ -1,4 +1,5 @@
 #include"jsonparse.h"
+#include<fstream>
 using namespace cocos2d;
 using namespace rapidjson;
 using namespace std;
@@ -6,8 +7,15 @@ using namespace std;
 bool getAllBrickWithFile(const std::string& fileName, std::vector<BrickData*>& vec)
 {
 	rapidjson::Document document;
-	string content = FileUtils::getInstance()->getStringFromFile(fileName);
-	document.Parse<0>(content.c_str());
+	//string content = FileUtils::getInstance()->getStringFromFile(fileName);
+	//document.Parse<0>(content.c_str());
+	ifstream infile(fileName);
+	ostringstream content;
+	char ch;
+	while (content&&infile.get(ch))
+		content.put(ch);
+	infile.close();
+	document.Parse<0>(content.str().c_str());
 
 	if (document.HasParseError())
 	{

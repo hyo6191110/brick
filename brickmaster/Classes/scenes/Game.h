@@ -29,6 +29,7 @@ protected:
 	cocos2d::Label* _showlife;
 	cocos2d::Label* _showscore;
 	cocos2d::Label* _showlevel;
+	bool islife = true;
 	//Î»ÖÃÊý¾Ý
 	float _gamescreenWidth;
 	float _gamescreenHeight;
@@ -80,6 +81,8 @@ public:
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode code, cocos2d::Event* event);
 	bool onContactBegin(cocos2d::PhysicsContact& contact);
+
+	virtual void recoverTime();
 };
 
 #endif

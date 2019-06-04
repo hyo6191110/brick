@@ -4,6 +4,7 @@ USING_NS_CC;
 using namespace ui;
 #include "scenes/Level.h"
 #include "scenes/LevelDesigner.h"
+#include "scenes/UserlevelSelection.h"
 
 Scene* SingleGame::createScene()
 {
@@ -34,7 +35,11 @@ void SingleGame::SwitchToDesigner(cocos2d::Ref* pSender)
 	auto scene = LevelDesigner::createScene();
 	Director::getInstance()->pushScene(scene);
 }
-
+void SingleGame::SwitchToSelector(cocos2d::Ref* pSender)
+{
+	auto scene = UserLevelSelection::createScene();
+	Director::getInstance()->pushScene(scene);
+}
 bool SingleGame::init()
 {
 	if (!Layer::init())
@@ -45,6 +50,10 @@ bool SingleGame::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	auto bg = Sprite::create("background/background_menu_02.png");
+	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	this->addChild(bg);
+
 	auto closeItem = MenuItemImage::create(
 		"CloseNormal.png",
 		"CloseSelected.png",
@@ -54,16 +63,21 @@ bool SingleGame::init()
 	closeItem->setPosition(Vec2(x, y));
 	
 	auto freemode = MenuItemImage::create(
-		"free_selectlevel.png",
-		"free_selectlevel_s.png", CC_CALLBACK_1(SingleGame::SwitchToFreeSelete, this));
+		"menu/free_selectlevel.png",
+		"menu/free_selectlevel_s.png", CC_CALLBACK_1(SingleGame::SwitchToFreeSelete, this));
 	freemode->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 3 / 4));
  	
 	auto designer = MenuItemImage::create(
-		"level_design.png",
-		"level_design_s.png", CC_CALLBACK_1(SingleGame::SwitchToDesigner, this));
-	designer->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 1 / 4));
+		"menu/level_design.png",
+		"menu/level_design_s.png", CC_CALLBACK_1(SingleGame::SwitchToDesigner, this));
+	designer->setPosition(Vec2(freemode->getBoundingBox().getMinX()+designer->getContentSize().width/2, visibleSize.height * 2 / 4));
 
-    auto menu = Menu::create(closeItem,freemode,designer, NULL);
+	auto selector = MenuItemImage::create(
+		"menu/level_select.png",
+		"menu/level_select_s.png", CC_CALLBACK_1(SingleGame::SwitchToSelector, this));
+	selector->setPosition(Vec2(freemode->getBoundingBox().getMinX() + designer->getContentSize().width +selector->getContentSize().width/2, visibleSize.height * 2 / 4));
+
+    auto menu = Menu::create(closeItem,freemode,designer,selector ,NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 

@@ -24,7 +24,7 @@ public:
 	static BrickItem* create(const std::string fileName)
 	{
 		auto sprite = new BrickItem();
-		if (sprite&&sprite->initWithFile(fileName))
+		if (sprite&&sprite->initWithSpriteFrameName(fileName))
 		{
 			sprite->autorelease();
 			return sprite;

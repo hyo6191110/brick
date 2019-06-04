@@ -12,6 +12,7 @@ public:
 	void Closethis(cocos2d::Ref* pSender);
 	void SwitchToFreeSelete(cocos2d::Ref* pSender);
 	void SwitchToDesigner(cocos2d::Ref* pSender);
+	void SwitchToSelector(cocos2d::Ref* pSender);
 	
 };
 #endif

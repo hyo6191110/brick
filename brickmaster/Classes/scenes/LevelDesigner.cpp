@@ -13,7 +13,7 @@ Scene* LevelDesigner::createScene()
 void LevelDesigner::Closethis(Ref* pSender)
 {
 	//this->unscheduleUpdate();
-	//SpriteFrameCache::getInstance->removeUnusedSpriteFrames();
+	SpriteFrameCache::getInstance()->removeSpriteFrames();
 	//SpriteFrameCache::getInstance->destroyInstance();
 	//this->_eventDispatcher->removeAllEventListeners();
 	Director::getInstance()->popScene();
@@ -22,7 +22,7 @@ void LevelDesigner::Closethis(Ref* pSender)
 
 void LevelDesigner::addbrick(int type, float x, float y)
 {
-	auto brick = Brick::create(StringUtils::format("designer\\brick_%d.png", type));
+	auto brick = Brick::create(StringUtils::format("brick_%d.png", type));
 	brick->settype(type);
 	brick->setPosition(x, y);
 	this->addChild(brick);
@@ -32,7 +32,7 @@ void LevelDesigner::addbrick(int type, float x, float y)
 void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 {
 	bool rewrite=false;
-	if (FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/"+_fileName))
+	if (FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/"+_fileName))
 	{
 		_showsavelog->setString("Rewrite:"+_fileName);
 		rewrite = true;
@@ -53,10 +53,7 @@ void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 	StringBuffer buffer;
 	PrettyWriter<StringBuffer> pretty_writer(buffer);
 	document.Accept(pretty_writer);
-	ofstream outfile;
-	string fullPath = "D:/1/cocos_project/brickmaster/Resources/levels/";
-	fullPath += _fileName;
-	outfile.open(fullPath);
+	ofstream outfile("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/"+ _fileName);
 	outfile << buffer.GetString();
 	outfile.close();
 	if(rewrite==false)
@@ -66,7 +63,7 @@ void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 }
 void LevelDesigner::ReadfromFile(cocos2d::Ref* pSender)
 {
-	if (!FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/" + _fileName))
+	if (!FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/" + _fileName))
 	{
 		_showsavelog->setString("No file,try another name");
 		return;
@@ -78,7 +75,7 @@ void LevelDesigner::ReadfromFile(cocos2d::Ref* pSender)
 	vec_brick.clear();
 
 	vector<BrickData*> vec_data;
-	getAllBrickWithFile("levels/"+_fileName,vec_data);
+	getAllBrickWithFile("levels/user_levels/"+_fileName,vec_data);
 	for (auto it : vec_data)
 	{
 		addbrick(it->getType(),it->getX(),it->getY());
@@ -96,7 +93,7 @@ bool LevelDesigner::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("designer/design_bricks.plist", "designer/design_bricks.png");
 	auto info = Sprite::create("game\\status_board.png");
 	info->setPosition(info->getContentSize().width / 2, visibleSize.height / 2);
 	this->addChild(info);
@@ -115,28 +112,28 @@ bool LevelDesigner::init()
 	_designarea = area->getBoundingBox();
 
 	_fileName = StringUtils::format("level_%d.json", _levelNum);
-	_showfileName = Label::createWithTTF(_fileName, "fonts\\COLONNA.ttf", 36, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showfileName->setPosition(info->getContentSize().width / 2, 150);
+	_showfileName = Label::createWithTTF(StringUtils::format("level_%d", _levelNum), "fonts\\BRITANIC.ttf", 36, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showfileName->setPosition(info->getContentSize().width / 2, 300);
 	this->addChild(_showfileName);
-	_showsavelog= Label::createWithTTF("(No File Saved)", "fonts\\COLONNA.ttf", 36, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showsavelog->setPosition(info->getContentSize().width / 2, 50);
+	_showsavelog= Label::createWithTTF("(No File Saved)", "fonts\\BRITANIC.ttf", 24, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showsavelog->setPosition(info->getContentSize().width / 2, 75);
 	this->addChild(_showsavelog);
 
-	auto add= Label::createWithTTF("+", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	auto add= Label::createWithTTF("+", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto addItem = MenuItemLabel::create(add, [=](Ref* pSender){
 		_levelNum++;
 		_fileName = StringUtils::format("level_%d.json", _levelNum);
-		_showfileName->setString(_fileName);
+		_showfileName->setString(StringUtils::format("level_%d", _levelNum));
 	});
-	addItem->setPosition(275, 150);
-	auto minus = Label::createWithTTF("-", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	addItem->setPosition(250, 300);
+	auto minus = Label::createWithTTF("-", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto minusItem = MenuItemLabel::create(minus, [=](Ref* pSender) {
 		if (_levelNum == 1)return;
 		_levelNum--;
 		_fileName = StringUtils::format("level_%d.json", _levelNum);
-		_showfileName->setString(_fileName);
+		_showfileName->setString(StringUtils::format("level_%d", _levelNum));
 	});
-	minusItem->setPosition(25, 150);
+	minusItem->setPosition(50, 300);
 
 	auto closeItem = MenuItemImage::create(
 		"CloseNormal.png",
@@ -146,15 +143,15 @@ bool LevelDesigner::init()
 	float y = origin.y + closeItem->getContentSize().height / 2;
 	closeItem->setPosition(Vec2(x, y));
 
-	auto loadlable = Label::createWithTTF("Load", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	auto loadlable = Label::createWithTTF("Load", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto loadItem = MenuItemLabel::create(loadlable,
 		CC_CALLBACK_1(LevelDesigner::ReadfromFile, this));
-	loadItem->setPosition(info->getContentSize().width / 2, 120);
+	loadItem->setPosition(info->getContentSize().width / 2, 225);
 
-	auto savelable= Label::createWithTTF("Save", "fonts\\COLONNA.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	auto savelable= Label::createWithTTF("Save", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto saveItem = MenuItemLabel::create(savelable,
 		CC_CALLBACK_1(LevelDesigner::WritetoFile,this));
-	saveItem->setPosition(info->getContentSize().width/2,90);
+	saveItem->setPosition(info->getContentSize().width/2,150);
 
 	auto menu = Menu::create(closeItem,loadItem,saveItem,addItem,minusItem, NULL);
 	menu->setPosition(Vec2::ZERO);

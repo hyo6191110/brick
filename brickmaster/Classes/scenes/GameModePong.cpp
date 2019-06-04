@@ -1,7 +1,7 @@
 #include"GameModePong.h"
 using namespace cocos2d;
 
-Scene*  GameModePong::createScenePong(int life, int level)
+Scene*  GameModePong::createScenePong(int life, int level, int difficulty)
 {
 	auto scene = Scene::createWithPhysics();
 	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
@@ -11,6 +11,7 @@ Scene*  GameModePong::createScenePong(int life, int level)
 	layer->_level = level;
 	layer->_player1->setLife(life);
 	layer->_player_opposite->setLife(life);
+	layer->_player_opposite->setAIDifficulty(difficulty);
 	layer->initAfter();
 	scene->addChild(layer);
 	return scene;
@@ -26,6 +27,16 @@ void GameModePong::initMode()
 void GameModePong::updateMode()
 {
 	collisionDetection(_player_opposite);
+
+	if (!V_balls.empty())
+		if (!isRoundStarted&&_ball_side== _player_opposite)
+		{
+			if (V_balls.back()->getPositionX() != _player_opposite->getPositionX())
+			{
+				V_balls.back()->setPositionX(_player_opposite->getPositionX());
+			}
+		}
+
 	if (balltodestroy)
 	{
 		auto player = balltodestroy->getPlateBelongto();
@@ -39,12 +50,14 @@ void GameModePong::updateMode()
 		{		
 			this->unschedule(schedule_selector(GameModePong::updateTime));
 			this->unschedule(schedule_selector(GameModePong::oppositeAI));
+			_player_opposite->stopMoving();
 			gameOver(false);
 		}	
 		else if (_player_opposite->getLife() == 0)
 		{
 			this->unschedule(schedule_selector(GameModePong::updateTime));
 			this->unschedule(schedule_selector(GameModePong::oppositeAI));
+			_player_opposite->stopMoving();
 			gameOver(true);
 		}
 		else if (V_balls.empty())
@@ -105,15 +118,15 @@ void GameModePong::generateBricks()
 	Brick* brick;
 	if (seed < 2)
 	{
-		brick = Brick::create("game/brick_addPoint.png", 1, 2);
+		brick = Brick::create("brick_addPoint.png", 1, 2);
 	}
 	else if (seed < 7)
 	{
-		brick = Brick::create("game/brick_1.png", 1, 1);
+		brick = Brick::create("brick_1.png", 1, 1);
 	}
 	else
 	{
-		brick = Brick::create("game/brick_52.png", 1, 1, false, true);
+		brick = Brick::create("brick_52.png", 1, 1, false, true);
 	}
 	LOG_INFO("Bonus Brick!");
 	brickcount++;
@@ -124,18 +137,25 @@ void GameModePong::generateBricks()
 void GameModePong::oppositeAI(float delta)
 {
 	if (isGameOver)
+	{
 		return;
-
+	}
 	if (_ball_side == _player_opposite && !isRoundStarted)
 	if(!V_balls.empty())
 	{
-		Vec2 velocity(random()%300- random() % 300, -500);
-		velocity.normalize();
-		velocity *= V_balls.back()->getSpeed();
-		V_balls.back()->getPhysicsBody()->setDynamic(true);
-		V_balls.back()->getPhysicsBody()->setVelocity(velocity);
-		isRoundStarted = true;
-		return;
+		if (_shoot_waittime == 0)
+		{
+			Vec2 velocity(random() % 300 - random() % 300, -500);
+			velocity.normalize();
+			velocity *= V_balls.back()->getSpeed();
+			V_balls.back()->getPhysicsBody()->setDynamic(true);
+			V_balls.back()->getPhysicsBody()->setVelocity(velocity);
+			isRoundStarted = true;
+			_shoot_waittime = 24;
+			return;
+		}
+		else
+			_shoot_waittime--;
 	}
 	bool flag = false;
 	float op_pos = _player_opposite->getPositionX();
@@ -147,6 +167,25 @@ void GameModePong::oppositeAI(float delta)
 			continue;
 
 		float destinition = pos.x + velo.x / velo.y*(_gamescreenHeight - pos.y-50);
+		if (destinition < _gamescreen.getMinX())
+		{
+			float x1 = pos.x - _gamescreen.getMinX();
+			float y1 = x1 * velo.y / (-velo.x);
+			float y2 = _gamescreenHeight - pos.y - y1;
+			destinition = _gamescreen.getMinX() + y2 * x1 / y1;
+		}
+		if (destinition > _gamescreen.getMaxX())
+		{
+			float x1 = -pos.x + _gamescreen.getMaxX();
+			float y1 = x1 * velo.y / (velo.x);
+			float y2 = _gamescreenHeight - pos.y - y1;
+			destinition = _gamescreen.getMaxX() - y2 * x1 / y1;
+		}
+		if (destinition < _gamescreen.getMinX() + _player_opposite->getContentSize().width / 2 * _player_opposite->getScaleX())
+			destinition = _gamescreen.getMinX() + _player_opposite->getContentSize().width / 2 * _player_opposite->getScaleX();
+		if (destinition > _gamescreen.getMaxX() - _player_opposite->getContentSize().width / 2 * _player_opposite->getScaleX())
+			destinition = _gamescreen.getMaxX() - _player_opposite->getContentSize().width / 2 * _player_opposite->getScaleX();
+
 		flag = true;
 		if (op_pos > destinition+20)
 		{

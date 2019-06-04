@@ -10,6 +10,7 @@ Scene*  GameModeTimelimit::createSceneTimelimit(int level,int time)
 	layer->_life = -1;
 	layer->_level = level;
 	layer->_time = time;
+	layer->islife = false;
 	layer->initAfter();
 	scene->addChild(layer);
 	return scene;
@@ -24,18 +25,17 @@ void GameModeTimelimit::updateMode()
 	if (balltodestroy)
 	{
 		destroyball(balltodestroy);
+		if (_time > 10)
+		{
+			_time -= 5;
+			LOG_INFO("Punishment:-5 s");
+		}
 		if (V_balls.empty())
 		{
 			_point_multiple = 10;
 			_show_point_multi->setString("10");
 			createballforPlate(_player1);
-			isRoundStarted = false;
-			if (_time > 10)
-			{
-				_time -= 5;
-				LOG_INFO("Punishment:-5 s");
-			}
-					
+			isRoundStarted = false;				
 		}
 		balltodestroy = nullptr;
 	}
@@ -127,20 +127,28 @@ void GameModeTimelimit::generateBricks()
 	Brick* brick;
 	if (seed < 3)
 	{
-		brick = Brick::create("game/brick_addPoint.png", 1, 2);
+		brick = Brick::create("brick_addPoint.png", 1, 2);
 	}
 	else if (seed < 6)
 	{
-		brick = Brick::create("game/brick_addTime.png", 1, 0);
+		brick = Brick::create("brick_addTime.png", 1, 0);
 		brick->settype(1000 + random() % 5);
 	}
 	else
 	{
-		brick = Brick::create("game/brick_52.png", 1, 1, false, true);
+		brick = Brick::create("brick_52.png", 1, 1, false, true);
 	}
 	LOG_INFO("Bonus Brick!");
 	brickcount++;
 	brick->initWithData(x, y);
 	this->addChild(brick);
 	V_destroyedbricks.erase(it);
+}
+
+void GameModeTimelimit::recoverTime()
+{
+	_time += 10;
+	_showtime->setString(StringUtils::format("%d", _time));
+	LOG_INFO("Time +10s ");
+
 }

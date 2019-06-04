@@ -21,6 +21,9 @@ void Brick::initWithData(float x, float y )
 
 void Brick::damaged()
 {
-	
 	_hp -= 1;
+	if (_hp > 0)
+	{
+		setSpriteFrame(StringUtils::format("brick_%d.png", _hp));
+	}
 }

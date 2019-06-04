@@ -41,12 +41,13 @@ public:
 	void  setLife(int hp) { _life = hp; }
 	void  recover() { _life++; }
 	void  damaged() { _life--; }
-	void  speedUp() { if(_velocity<900)_velocity += 100; }
-	void  speedDown() { if (_velocity > 300)_velocity -= 100; }
+	void  speedUp() { if(_velocity<1500)_velocity += 200; }
+	void  speedDown() { if (_velocity > 300)_velocity -= 200; }
 
 	bool checkLengthIntergrity() { return _length > 0.4&&_length < 1.8; }
 	void expand();
 	void shrink();
+	void setAIDifficulty(int d);
 private:
 	float _velocity=500;
 	float _startPosition=0;

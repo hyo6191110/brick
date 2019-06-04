@@ -10,7 +10,7 @@ public:
 	{
 		auto sprite = new Brick();
 
-		if (sprite&&sprite->initWithFile(filename))
+		if (sprite&&sprite->initWithSpriteFrameName(filename))
 		{
 			sprite->_hp = hp;
 			sprite->_score = s;
