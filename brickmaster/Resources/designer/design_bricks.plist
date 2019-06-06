@@ -4,7 +4,7 @@
     <dict>
         <key>frames</key>
         <dict>
-            <key>brick_1.png</key>
+            <key>d_brick_1.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -19,7 +19,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_2.png</key>
+            <key>d_brick_2.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -34,7 +34,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_3.png</key>
+            <key>d_brick_3.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -49,7 +49,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_5.png</key>
+            <key>d_brick_5.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -64,7 +64,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_51.png</key>
+            <key>d_brick_51.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -79,7 +79,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_52.png</key>
+            <key>d_brick_52.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -94,7 +94,7 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
-            <key>brick_8.png</key>
+            <key>d_brick_8.png</key>
             <dict>
                 <key>aliases</key>
                 <array/>
@@ -123,7 +123,7 @@
             <key>size</key>
             <string>{240,120}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:8445715bee73d3b71d11bdc32bd41dcf:95cedb723e1c929cc85f312b3f00f3ef:1c63edf3992a6c59f25cc08968a44db1$</string>
+            <string>$TexturePacker:SmartUpdate:de63aae4ffe9807a0ae047329e9b6fbb:95cedb723e1c929cc85f312b3f00f3ef:1c63edf3992a6c59f25cc08968a44db1$</string>
             <key>textureFileName</key>
             <string>design_bricks.png</string>
         </dict>

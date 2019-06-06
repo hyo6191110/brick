@@ -22,7 +22,7 @@ void LevelDesigner::Closethis(Ref* pSender)
 
 void LevelDesigner::addbrick(int type, float x, float y)
 {
-	auto brick = Brick::create(StringUtils::format("brick_%d.png", type));
+	auto brick = Brick::create(StringUtils::format("d_brick_%d.png", type));
 	brick->settype(type);
 	brick->setPosition(x, y);
 	this->addChild(brick);
@@ -317,32 +317,49 @@ bool LevelDesigner::ScreenTouchBegan(Touch* touch, Event* event)
 	}
 	default:
 	{
-		if (_designarea.containsPoint(nodeLoca))
+		if (isformatmode)
 		{
-			if (isformatmode)
+			for (auto it : _brickframes)
 			{
-				for (auto it : _brickframes)
+				if (it->getBoundingBox().containsPoint(nodeLoca))
 				{
-					if (it->getBoundingBox().containsPoint(nodeLoca))
+					bool isintersects = false;
+					for (auto ia : vec_brick)
 					{
-						bool flag = false;
-						for (auto ia : vec_brick)
-						{
-							if (ia->getPosition() == it->getPosition())
-								flag = true;
-						}
-						if (flag == true)
-							break;
-						addbrick(currenttag, it->getPositionX(), it->getPositionY());
+						if (ia->getPosition() == it->getPosition())
+							isintersects = true;
+					}
+					if (isintersects == true)
+						break;
+					addbrick(currenttag, it->getPositionX(), it->getPositionY());
+					break;
+				}
+			}
+		}
+		else
+		{
+			Rect brick_rect(nodeLoca.x - 40, nodeLoca.y - 20, 80, 40);
+			if (_designarea.getMinX() <= brick_rect.getMinX() &&
+				_designarea.getMinY() <= brick_rect.getMinY() &&
+				_designarea.getMaxX() >= brick_rect.getMaxX() &&
+				_designarea.getMaxY() >= brick_rect.getMaxY())
+			{
+				bool isintersects = false;
+				for (auto brick : vec_brick)
+				{
+					if (brick->getBoundingBox().intersectsRect(brick_rect))
+					{
+						isintersects = true;
 						break;
 					}
 				}
+				if (isintersects == false)
+					addbrick(currenttag, nodeLoca.x, nodeLoca.y);
 			}
-			else
-			{
-				addbrick(currenttag, nodeLoca.x, nodeLoca.y);
-			}
+
 		}
+
+			
 		
 		break;
 	}
@@ -357,7 +374,27 @@ void LevelDesigner::ScreenTouchMoved(Touch* touch, Event* event)
 	{
 		if (it->getBoundingBox().containsPoint(nodeLoca))
 		{
-			it->setPosition(it->getPosition() + touch->getDelta());
+			bool isintersects = false;
+			Rect rect(it->getBoundingBox().getMinX() + touch->getDelta().x,
+				it->getBoundingBox().getMinY() + touch->getDelta().y,
+				it->getContentSize().width, it->getContentSize().height);
+			if (_designarea.getMinX() > rect.getMinX() ||
+				_designarea.getMinY() > rect.getMinY() ||
+				_designarea.getMaxX() < rect.getMaxX() ||
+				_designarea.getMaxY() < rect.getMaxY())
+				break;
+			for (auto brick : vec_brick)
+			{
+				if (it == brick)
+					continue;
+				if (brick->getBoundingBox().intersectsRect(rect))
+				{
+					isintersects = true;
+					break;
+				}
+			}
+			if(isintersects==false)
+				it->setPosition(it->getPosition() + touch->getDelta());
 			break;
 		}
 	}
