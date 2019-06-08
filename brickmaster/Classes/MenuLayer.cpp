@@ -4,9 +4,9 @@
 #include "MenuSettings.h"
 #include "MenuUser.h"
 #include "MenuStore.h"
-#include "ui/CocosGUI.h"
 USING_NS_CC;
-using namespace ui;
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 
 Scene* MenuLayer::createScene()
 {
@@ -18,25 +18,28 @@ Scene* MenuLayer::createScene()
 
 void MenuLayer::Closethis(Ref* pSender)
 {
-    SpriteFrameCache::getInstance()->destroyInstance();
+	unloadResources();
 	this->_eventDispatcher->removeAllEventListeners();
 	Director::getInstance()->end();
 }
 
 void MenuLayer::SwitchtoSingle(cocos2d::Ref* pSender)
 {
+	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto scene = SingleGame::createScene();
 	Director::getInstance()->pushScene(scene);
 }
 
 void MenuLayer::SwitchtoMulti(cocos2d::Ref* pSender)
 {
+	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto scene = MultiGame::createScene();
 	Director::getInstance()->pushScene(scene);
 }
 
 void MenuLayer::PoptoSettings(cocos2d::Ref* pSender)
 {
+	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto layer = MenuSettings::create();
 	auto scene = Scene::create();
 	scene->addChild(layer);
@@ -45,6 +48,7 @@ void MenuLayer::PoptoSettings(cocos2d::Ref* pSender)
 
 void MenuLayer::PoptoUser(cocos2d::Ref* pSender)
 {
+	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto layer = MenuUser::create();
 	auto scene = Scene::create();
 	scene->addChild(layer);
@@ -53,6 +57,7 @@ void MenuLayer::PoptoUser(cocos2d::Ref* pSender)
 
 void MenuLayer::PoptoStore(cocos2d::Ref* pSender)
 {
+	SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto layer = MenuStore::create();
 	auto scene = Scene::create();
 	scene->addChild(layer);
@@ -120,4 +125,32 @@ bool MenuLayer::init()
 
 	return true;
 	
+}
+void MenuLayer::preloadResources()
+{
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("designer/design_bricks.plist", "designer/design_bricks.png");
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("game/game_sprite_default.plist", "game/game_sprite_default.png");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_deadzone.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_plate.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_wall.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/brick_damage.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/brick_destroy.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/shoot_ball.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/newItem.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/getItem.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/win.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/lose.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/click.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/pop.wav");
+}
+void MenuLayer::unloadResources()
+{
+	SpriteFrameCache::getInstance()->removeSpriteFrames();
+	SpriteFrameCache::getInstance()->destroyInstance();
+	SimpleAudioEngine::getInstance()->end();
+}
+void MenuLayer::onEnter()
+{
+	Layer::onEnter();
+	preloadResources();
 }

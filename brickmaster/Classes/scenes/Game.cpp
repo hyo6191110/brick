@@ -1,6 +1,9 @@
 #include "Game.h"
 USING_NS_CC;
 
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
+
 Scene*  Game::createScene(int life, int level)
 {
 	auto scene = Scene::createWithPhysics();
@@ -20,7 +23,7 @@ Scene*  Game::createScene(int life, int level)
 void Game::Closethis(Ref* pSender)
 {
 	this->unscheduleAllCallbacks();
-    SpriteFrameCache::getInstance()->removeSpriteFrames();
+    //SpriteFrameCache::getInstance()->removeSpriteFrames();
     //SpriteFrameCache::getInstance->destroyInstance();
     //this->_eventDispatcher->removeAllEventListeners();
     Director::getInstance()->popScene();
@@ -58,8 +61,10 @@ void Game::update(float delta)
 				
 }
 
-void Game::gameOver(bool isWin)
-{
+void Game::gameOver(bool isWinMode, bool isWin)
+{	
+	if (isGameOver == true)
+		return;
 	isGameOver = true;
 	for (auto it = V_items.begin(); it != V_items.end();)
 	{
@@ -75,31 +80,38 @@ void Game::gameOver(bool isWin)
 	board->setPosition(_centerX, _centerY);
 	board->setLocalZOrder(5);
 	addChild(board);
-	if (isWin)
+	if (isWinMode)
 	{
-		auto show = Label::createWithTTF("You win!","fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-		show->setPosition(_centerX, _centerY);
+		auto show = Label::createWithTTF("You win!", "fonts\\BRITANIC.ttf", 72, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+		show->setPosition(_centerX, _centerY + 120);
 		show->setLocalZOrder(6);
+		show->setColor(Color3B::BLACK);
 		addChild(show);
-		//pop board:back,retry
-		//write to user file
+		if (!isWin)
+			show->setString("You lose!");
 	}
-	else
-	{
-		auto show = Label::createWithTTF("You lose!", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-		show->setPosition(_centerX, _centerY);
-		show->setLocalZOrder(6);
-		addChild(show);
-		//pop board:back,retry
-		//write to user file
-	}
+	auto shows = Label::createWithTTF(StringUtils::format("Score:%d", _score),
+		"fonts\\BRITANIC.ttf", 72, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	shows->setPosition(_centerX, _centerY+20);
+	shows->setColor(Color3B::BLACK);
+	shows->setLocalZOrder(6);
+	addChild(shows);
+	
+	writeScoreToUserData();
+
+	auto showi = Label::createWithTTF(StringUtils::format("Successfully saved score!", _score),
+		"fonts\\BRITANIC.ttf", 36, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	showi->setPosition(_centerX, _centerY-100);
+	showi->setLocalZOrder(6);
+	addChild(showi);
 }
 
 void Game::createPlayerSide(int side, Plate*& player, Deadzone*& deadzone)
 {
 	deadzone = Deadzone::create("game\\deadzone.png");
 	deadzone->setTextureRect(Rect(0, 0, _gamescreenWidth, 20));
-	player = Plate::create("game\\defender_1.png");
+
+	player = Plate::create(UserDefault::getInstance()->getStringForKey("plate_texture","game/defender_0.png"));
 
 	float x= _centerX, 
 		  y_deadzone=deadzone->getContentSize().height/2,
@@ -224,13 +236,13 @@ bool Game::init()
 	{
 		return false;
 	}
-
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	auto bg = Sprite::create(_backgroundfile);
+
+	auto bg = Sprite::create(UserDefault::getInstance()->getStringForKey("background_texture","background/background_1.jpg" ));
 	bg->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	addChild(bg);
-	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("game/game_sprite_default.plist","game/game_sprite_default.png");
+
 	//1.创建退出按钮
 	auto closeItem = MenuItemImage::create(
 		"back.png",
@@ -273,6 +285,7 @@ bool Game::init()
 	isRoundStarted = false;
 	createPlayerSide(1, _player1, _deadzone1);
 	createballforPlate(_player1);
+	_ball_side = _player1;
 	//6.根据游戏模式给出特别化的界面创建
 	this->initMode(); 
 	//7.游戏的主循环、碰撞检测、按键事件检测
@@ -378,7 +391,7 @@ void Game::updateMode()
 			_showlife->setString(StringUtils::format("%d", _player1->getLife()));
 			if (_player1->getLife() == 0)
 			{
-				gameOver(false);
+				gameOver(true,false);
 			}
 			else
 			{
@@ -395,7 +408,7 @@ void Game::updateMode()
 		{
 			destroyball(dball);
 		}
-		gameOver(true);
+		gameOver(true,true);
 	}
 }
 void Game::createHUDMode()
@@ -422,6 +435,7 @@ void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode code, Event* event)
 	case EventKeyboard::KeyCode::KEY_SPACE:
 	{
 		if (!isRoundStarted)
+		if(_ball_side==_player1)
 		{
 			V_balls.back()->shootBall(_player1);
 			isRoundStarted = true;
@@ -458,6 +472,7 @@ bool Game::onContactBegin(PhysicsContact& contact)
 	auto SB = contact.getShapeB()->getBody()->getNode();
 	if (SA&&SB)
 	{
+		
 		if (SB->getTag() == BRICK_TAG && SA->getTag() == BALL_TAG)
 		{
 			auto ball= dynamic_cast<Ball*>(SA);
@@ -662,4 +677,48 @@ void Game::initMode()
 void Game::recoverTime()
 {
 
+}
+void Game::writeScoreToUserData()
+{
+	vector<classic_data> v_classic;
+	int finalscore = _score*10 / (allbrickcount-brickcount);
+	for (int i = 0; i < 10; i++)
+	{
+		string score = StringUtils::format("classic_score_%d", i);
+		string brick = StringUtils::format("classic_brick_%d", i);
+		string level = StringUtils::format("classic_level_%d", i);
+		int s;
+		if((s = UserDefault::getInstance()->getIntegerForKey(score.c_str(),-1))==-1)
+			break;
+		else
+		{
+			classic_data temp;
+			temp.score = s;
+			temp.brick = UserDefault::getInstance()->getIntegerForKey(brick.c_str(),-1);
+			temp.level = UserDefault::getInstance()->getIntegerForKey(level.c_str(), -1);
+			v_classic.push_back(temp);
+		}
+	}
+	v_classic.push_back(classic_data(finalscore, allbrickcount-brickcount, _level));
+	sort(v_classic.begin(), v_classic.end());
+	for (size_t i = 0; i < (v_classic.size() < 10 ? v_classic.size() : 10); i++)
+	{
+		string score = StringUtils::format("classic_score_%d", i);
+		string brick = StringUtils::format("classic_brick_%d", i);
+		string level = StringUtils::format("classic_level_%d", i);
+		UserDefault::getInstance()->setIntegerForKey(score.c_str(), v_classic.at(i).score);
+		UserDefault::getInstance()->setIntegerForKey(brick.c_str(), v_classic.at(i).brick);
+		UserDefault::getInstance()->setIntegerForKey(level.c_str(), v_classic.at(i).level);
+	}
+
+	int time= UserDefault::getInstance()->getIntegerForKey("classic_played",0 );
+	int average=UserDefault::getInstance()->getIntegerForKey("classic_average",0 );
+	int maxscore=UserDefault::getInstance()->getIntegerForKey("classic_maxscore",0 );
+	
+	average = (average*time + finalscore) / (time + 1);
+	time++;
+	maxscore = maxscore > _score ? maxscore : _score;
+	UserDefault::getInstance()->setIntegerForKey("classic_played",time );
+	UserDefault::getInstance()->setIntegerForKey("classic_average",average );
+	UserDefault::getInstance()->setIntegerForKey("classic_maxscore",maxscore );
 }

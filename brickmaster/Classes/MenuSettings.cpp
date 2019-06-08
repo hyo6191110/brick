@@ -1,7 +1,6 @@
 #include "MenuSettings.h"
 USING_NS_CC;
 
-
 void MenuSettings::Closethis(Ref* pSender)
 {
 	//this->unscheduleUpdate();
@@ -18,7 +17,6 @@ bool MenuSettings::init()
 	{
 		return false;
 	}
-
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 

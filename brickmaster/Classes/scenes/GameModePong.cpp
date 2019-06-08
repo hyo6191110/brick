@@ -51,14 +51,14 @@ void GameModePong::updateMode()
 			this->unschedule(schedule_selector(GameModePong::updateTime));
 			this->unschedule(schedule_selector(GameModePong::oppositeAI));
 			_player_opposite->stopMoving();
-			gameOver(false);
+			gameOver(true,false);
 		}	
 		else if (_player_opposite->getLife() == 0)
 		{
 			this->unschedule(schedule_selector(GameModePong::updateTime));
 			this->unschedule(schedule_selector(GameModePong::oppositeAI));
 			_player_opposite->stopMoving();
-			gameOver(true);
+			gameOver(true,true);
 		}
 		else if (V_balls.empty())
 		{
@@ -222,4 +222,56 @@ void GameModePong::oppositeAI(float delta)
 			_player_opposite->stopMoving();
 		}
 	}
+}
+void GameModePong::writeScoreToUserData()
+{
+	vector<pong_data> v_pong;
+	int finalscore = _score ;
+	for (int i = 0; i < 10; i++)
+	{
+		string score = StringUtils::format("pong_score_%d", i);
+		string mygoal = StringUtils::format("pong_mygoal_%d", i);
+		string opgoal = StringUtils::format("pong_opgoal_%d", i);
+		string level = StringUtils::format("pong_level_%d", i);
+		int s;
+		if ((s = UserDefault::getInstance()->getIntegerForKey(score.c_str(), -1)) == -1)
+			break;
+		else
+		{
+			pong_data temp;
+			temp.score = s;
+			temp.my_goal = UserDefault::getInstance()->getIntegerForKey(mygoal.c_str(), -1);
+			temp.op_goal = UserDefault::getInstance()->getIntegerForKey(opgoal.c_str(), -1);
+			temp.level = UserDefault::getInstance()->getIntegerForKey(level.c_str(), -1);
+			v_pong.push_back(temp);
+		}
+	}
+	v_pong.push_back(pong_data(finalscore, _life - _player_opposite->getLife(), _life-_player1->getLife(),  _level));
+	sort(v_pong.begin(), v_pong.end());
+	for (size_t i = 0; i < (v_pong.size() < 10 ? v_pong.size() : 10); i++)
+	{
+		string score = StringUtils::format("pong_score_%d", i);
+		string mygoal = StringUtils::format("pong_mygoal_%d", i);
+		string opgoal = StringUtils::format("pong_opgoal_%d", i);
+		string level = StringUtils::format("pong_level_%d", i);
+		UserDefault::getInstance()->setIntegerForKey(score.c_str(), v_pong.at(i).score);
+		UserDefault::getInstance()->setIntegerForKey(mygoal.c_str(), v_pong.at(i).my_goal);
+		UserDefault::getInstance()->setIntegerForKey(opgoal.c_str(), v_pong.at(i).op_goal);
+		UserDefault::getInstance()->setIntegerForKey(level.c_str(), v_pong.at(i).level);
+	}
+
+	int time = UserDefault::getInstance()->getIntegerForKey("pong_played", 0);
+	int average = UserDefault::getInstance()->getIntegerForKey("pong_average", 0);
+	int win= UserDefault::getInstance()->getIntegerForKey("pong_win", 0);
+	int maxscore = UserDefault::getInstance()->getIntegerForKey("pong_maxscore", 0);
+
+	average = (average*time + finalscore) / (time + 1);
+	time++;
+	maxscore = maxscore > _score ? maxscore : _score;
+	if (_player1->getLife() > _player_opposite->getLife())
+		win++;
+	UserDefault::getInstance()->setIntegerForKey("pong_played", time);
+	UserDefault::getInstance()->setIntegerForKey("pong_win", win);
+	UserDefault::getInstance()->setIntegerForKey("pong_average", average);
+	UserDefault::getInstance()->setIntegerForKey("pong_maxscore", maxscore);
 }

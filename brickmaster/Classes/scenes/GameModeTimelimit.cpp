@@ -10,6 +10,7 @@ Scene*  GameModeTimelimit::createSceneTimelimit(int level,int time)
 	layer->_life = -1;
 	layer->_level = level;
 	layer->_time = time;
+	layer->_totaltime = time;
 	layer->islife = false;
 	layer->initAfter();
 	scene->addChild(layer);
@@ -41,25 +42,7 @@ void GameModeTimelimit::updateMode()
 	}
 	if (_time <= 0)
 	{
-		isGameOver = true;
-		for (auto it = V_items.begin(); it != V_items.end();)
-		{
-			this->removeChild(*it);
-			it = V_items.erase(it);
-		}
-		for (auto it = V_balls.begin(); it != V_balls.end();)
-		{
-			this->removeChild(*it);
-			it = V_balls.erase(it);
-		}
-		auto board = Sprite::create("game\\winlose_board.png");
-		board->setPosition(_centerX, _centerY);
-		addChild(board);
-		auto show = Label::createWithTTF(StringUtils::format("Score:%d",_score), 
-			"fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-		show->setPosition(_centerX, _centerY);
-		addChild(show);
-
+		gameOver(false);
 		this->unschedule(schedule_selector(GameModeTimelimit::updateTime));
 	}
 }
@@ -151,4 +134,48 @@ void GameModeTimelimit::recoverTime()
 	_showtime->setString(StringUtils::format("%d", _time));
 	LOG_INFO("Time +10s ");
 
+}
+void GameModeTimelimit::writeScoreToUserData()
+{
+	vector<timelimit_data> v_timelimit;
+	int finalscore = _score*10 / _totaltime;
+	for (int i = 0; i < 10; i++)
+	{
+		string score = StringUtils::format("timelimit_score_%d", i);
+		string time = StringUtils::format("timelimit_time_%d", i);
+		string level = StringUtils::format("timelimit_level_%d", i);
+		int s;
+		if ((s = UserDefault::getInstance()->getIntegerForKey(score.c_str(), -1)) == -1)
+			break;
+		else
+		{
+			timelimit_data temp;
+			temp.score = s;
+			temp.time = UserDefault::getInstance()->getIntegerForKey(time.c_str(), -1);
+			temp.level = UserDefault::getInstance()->getIntegerForKey(level.c_str(), -1);
+			v_timelimit.push_back(temp);
+		}
+	}
+	v_timelimit.push_back(timelimit_data(finalscore, _totaltime, _level));
+	sort(v_timelimit.begin(), v_timelimit.end());
+	for (size_t i = 0; i < (v_timelimit.size() < 10 ? v_timelimit.size() : 10); i++)
+	{
+		string score = StringUtils::format("timelimit_score_%d", i);
+		string time = StringUtils::format("timelimit_time_%d", i);
+		string level = StringUtils::format("timelimit_level_%d", i);
+		UserDefault::getInstance()->setIntegerForKey(score.c_str(), v_timelimit.at(i).score);
+		UserDefault::getInstance()->setIntegerForKey(time.c_str(), v_timelimit.at(i).time);
+		UserDefault::getInstance()->setIntegerForKey(level.c_str(), v_timelimit.at(i).level);
+	}
+
+	int time = UserDefault::getInstance()->getIntegerForKey("timelimit_played", 0);
+	int average = UserDefault::getInstance()->getIntegerForKey("timelimit_average", 0);
+	int maxscore = UserDefault::getInstance()->getIntegerForKey("timelimit_maxscore", 0);
+
+	average = (average*time + finalscore) / (time + 1);
+	time++;
+	maxscore = maxscore > _score ? maxscore : _score;
+	UserDefault::getInstance()->setIntegerForKey("timelimit_played", time);
+	UserDefault::getInstance()->setIntegerForKey("timelimit_average", average);
+	UserDefault::getInstance()->setIntegerForKey("timelimit_maxscore", maxscore);
 }

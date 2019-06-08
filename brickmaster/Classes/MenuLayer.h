@@ -9,12 +9,15 @@ public:
 
 	CREATE_FUNC(MenuLayer);
 	static cocos2d::Scene* createScene();
-	virtual bool init();
+	virtual bool init() override;
+	virtual void onEnter() override;
 	void Closethis(cocos2d::Ref* pSender);
 	void SwitchtoSingle(cocos2d::Ref* pSender);
 	void SwitchtoMulti(cocos2d::Ref* pSender);
 	void PoptoSettings(cocos2d::Ref* pSender);
 	void PoptoUser(cocos2d::Ref* pSender);
 	void PoptoStore(cocos2d::Ref* pSender);
+	void preloadResources();
+	void unloadResources();
 };
 #endif

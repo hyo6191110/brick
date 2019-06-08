@@ -117,7 +117,8 @@ void Plate::setAIDifficulty(int d)
 		break;
 	}
 	}
-	auto player = Sprite::create(StringUtils::format("game/oppo_%d.png", d));
+	auto player = Sprite::create(StringUtils::format("game/defender_%d.png", d));
 	auto player_texture = player->getTexture();
 	this->setTexture(player_texture);
+	this->setFlippedY(true);
 }

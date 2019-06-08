@@ -13,7 +13,7 @@ Scene* LevelDesigner::createScene()
 void LevelDesigner::Closethis(Ref* pSender)
 {
 	//this->unscheduleUpdate();
-	SpriteFrameCache::getInstance()->removeSpriteFrames();
+	//SpriteFrameCache::getInstance()->removeSpriteFrames();
 	//SpriteFrameCache::getInstance->destroyInstance();
 	//this->_eventDispatcher->removeAllEventListeners();
 	Director::getInstance()->popScene();
@@ -93,7 +93,6 @@ bool LevelDesigner::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("designer/design_bricks.plist", "designer/design_bricks.png");
 	auto info = Sprite::create("game\\status_board.png");
 	info->setPosition(info->getContentSize().width / 2, visibleSize.height / 2);
 	this->addChild(info);
