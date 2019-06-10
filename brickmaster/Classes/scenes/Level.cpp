@@ -20,6 +20,12 @@ void Level::Closethis(Ref* pSender)
 	//SpriteFrameCache::getInstance->removeUnusedSpriteFrames();
 	//SpriteFrameCache::getInstance->destroyInstance();
 	//this->_eventDispatcher->removeAllEventListeners();
+	if(_currentlevel <=10000)
+	UserDefault::getInstance()->setIntegerForKey("default_level", _currentlevel);
+	UserDefault::getInstance()->setIntegerForKey("default_life", _currentlife);
+	UserDefault::getInstance()->setIntegerForKey("default_time", _currenttime);
+	UserDefault::getInstance()->setIntegerForKey("default_difficulty", _currentdifficulty);
+	UserDefault::getInstance()->setIntegerForKey("default_mode", static_cast<int>(_currentmode));
 	Director::getInstance()->popScene();
 
 }
@@ -145,19 +151,30 @@ bool Level::init()
 	bg->setLocalZOrder(-5);
 	this->addChild(bg);
 
-	_currentlevel = 1;
-	_currentlife = 3;
-	_currentmode = Classic;
-	_currenttime = 90;
-	_currentdifficulty = 2;
+	_currentlevel = UserDefault::getInstance()->getIntegerForKey("default_level",1);
+	string level_str = StringUtils::format("Level:%d", _currentlevel);
+	_currentlife = UserDefault::getInstance()->getIntegerForKey("default_life", 3);
+	string life_str = StringUtils::format("%d", _currentlife);
+	_currentmode = static_cast<GameMode>(UserDefault::getInstance()->getIntegerForKey("default_mode", 1));
+	string mode_str;
+	switch (_currentmode)
+	{
+	case Classic:	mode_str = "Classic"; break;
+	case Pong:	mode_str = "Pong"; break;
+	case Timelimit:	mode_str = "Timelimit"; break;
+	}
+	_currenttime = UserDefault::getInstance()->getIntegerForKey("default_time", 90);
+	string time_str = StringUtils::format("%d", _currenttime);
+	_currentdifficulty = UserDefault::getInstance()->getIntegerForKey("default_difficulty", 2);
+	string difficulty_str = StringUtils::format("%d", _currentdifficulty);
 
 	auto tmode = Label::createWithTTF("Mode", "fonts\\BOD_R.ttf",48,Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto tlife = Label::createWithTTF("Life", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto ttime = Label::createWithTTF("Time", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showmode=Label::createWithTTF("Classic", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showlife = Label::createWithTTF("3", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showtime = Label::createWithTTF("90", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	_showlevel= Label::createWithTTF("Level:1", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showmode=Label::createWithTTF(mode_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showlife = Label::createWithTTF(life_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showtime = Label::createWithTTF(time_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	_showlevel= Label::createWithTTF(level_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 
 	auto modeprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(Level::minusmode, this));
 	auto modenext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(Level::addmode, this));
@@ -223,13 +240,21 @@ bool Level::init()
 		case 5:
 			_showdifficulty->setString("Master"); break;
 		}
-
+		UserDefault::getInstance()->setIntegerForKey("default_difficulty", _currentdifficulty);
 	    });
 	_change_difficulty->setPosition(x7, y_ai);
 	_title_difficulty = Label::createWithTTF("AI", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	_title_difficulty->setPosition(x6,y_ai);
 	this->addChild(_title_difficulty);
-	_showdifficulty = Label::createWithTTF("Average", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
+	switch (_currentdifficulty)
+	{
+	case 1:_showdifficulty = Label::createWithTTF("Easy", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER); break;
+	case 2:_showdifficulty = Label::createWithTTF("Average", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER); break;
+	case 3:_showdifficulty = Label::createWithTTF("Normal", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER); break;
+	case 4:_showdifficulty = Label::createWithTTF("Hard", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER); break;
+	case 5:_showdifficulty = Label::createWithTTF("Master", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER); break;
+	}
+	
 	_showdifficulty->setPosition(x7, y_ai);
 	_showdifficulty->setLocalZOrder(5);
 	_showdifficulty->setColor(Color3B::BLACK);
@@ -246,7 +271,8 @@ bool Level::init()
 	auto menu = Menu::create(closeItem,modeprev,modenext,lifeprev,lifenext, timeprev, timenext, startgame,_change_difficulty, NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
-	setAIVisible(false);
+	if(_currentmode!=Pong)
+		setAIVisible(false);
 	createLevelSelection(y3);
 	
 	return true;

@@ -9,7 +9,10 @@
 #include "models/BrickItem.h"
 
 #include"utils/jsonparse.h"
+USING_NS_CC;
 
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 //为各种游戏元素给一个特有的标签用于识别
 const int BALL_TAG = 1;
 const int BRICK_TAG = 2;
@@ -54,7 +57,7 @@ public:
 	//根据配置文件加载砖块
 	void createBricksFromFile(const std::string& fileName);
 	//创建道具
-	void createBrickItem(float x, float y, int side);
+	void createBrickItem(float x, float y, int side,bool createdbynormalbrick=false);
 	//记录被销毁的砖块位置
 	virtual void recordBrick(Brick* brick);
 	//关闭场景
@@ -87,6 +90,12 @@ protected:
 	Ball* balltodestroy = nullptr;
 	bool isGameOver = false;
 	bool isRoundStarted = false;
+	//settings
+	bool normal_brick_dropitem=UserDefault::getInstance()->getBoolForKey("normal_brick_dropitem",false);
+	bool bgm_switch = UserDefault::getInstance()->getBoolForKey("bgm_switch", false);
+	bool effect_switch = UserDefault::getInstance()->getBoolForKey("effect_switch", false);
+	float bgm_volumn = UserDefault::getInstance()->getFloatForKey("bgm_volumn", 0.0f);
+	float effect_volumn = UserDefault::getInstance()->getFloatForKey("effect_volumn", 0.0f);
 	//盘、砖块、球等元素的管理
 	Plate* _ball_side;
 	Plate* _player1;
@@ -101,6 +110,22 @@ protected:
 	cocos2d::Label* _show_game_info;
 public:
 	void LOG_INFO(const std::string& str) { _show_game_info->setString(str); }
+	void PLAY_BGM(const std::string& str)
+	{
+		if (bgm_switch)
+		{
+			SimpleAudioEngine::getInstance()->playBackgroundMusic(str.c_str(), true);
+			SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(bgm_volumn);
+		}
+	}
+	void PLAY_EFFECT(const std::string& str)
+	{
+		if (effect_switch)
+		{
+			SimpleAudioEngine::getInstance()->setEffectsVolume(effect_volumn);
+			SimpleAudioEngine::getInstance()->playEffect(str.c_str());
+		}
+	}
 };
 
 #endif

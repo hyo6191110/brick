@@ -107,18 +107,14 @@ void Plate::setAIDifficulty(int d)
 	case 4:
 	{
 		_velocity = 650;
-		setScaleX(1.05f);
 		break;
 	}
 	case 5:
 	{
 		_velocity = 750;
-		setScaleX(1.15f);
 		break;
 	}
 	}
-	auto player = Sprite::create(StringUtils::format("game/defender_%d.png", d));
-	auto player_texture = player->getTexture();
-	this->setTexture(player_texture);
+	
 	this->setFlippedY(true);
 }

@@ -25,7 +25,7 @@ void MenuLayer::Closethis(Ref* pSender)
 
 void MenuLayer::SwitchtoSingle(cocos2d::Ref* pSender)
 {
-	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
+	//SimpleAudioEngine::getInstance()->playEffect("effect/click.wav",false,1.0f,1.0f,1.0f);
 	auto scene = SingleGame::createScene();
 	Director::getInstance()->pushScene(scene);
 }
@@ -57,7 +57,7 @@ void MenuLayer::PoptoUser(cocos2d::Ref* pSender)
 
 void MenuLayer::PoptoStore(cocos2d::Ref* pSender)
 {
-	SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
+	//SimpleAudioEngine::getInstance()->playEffect("sound/effect/click.wav");
 	auto layer = MenuStore::create();
 	auto scene = Scene::create();
 	scene->addChild(layer);
@@ -130,18 +130,21 @@ void MenuLayer::preloadResources()
 {
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("designer/design_bricks.plist", "designer/design_bricks.png");
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("game/game_sprite_default.plist", "game/game_sprite_default.png");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_deadzone.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_plate.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/ball_wall.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/brick_damage.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/brick_destroy.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/shoot_ball.mp3");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/newItem.wav");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/getItem.wav");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/win.wav");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/lose.wav");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/click.wav");
-	SimpleAudioEngine::getInstance()->preloadEffect("sound/effect/pop.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/ball_deadzone.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/ball_plate.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/ball_wall.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/brick_damage.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/brick_destroy.mp3");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/shoot_ball.mp3");
+
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/newItem.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/getItem.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/win.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/lose.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/click.wav");
+	SimpleAudioEngine::getInstance()->preloadEffect("effect/pop.wav");
+
+	SimpleAudioEngine::getInstance()->preloadBackgroundMusic("bgm/bgm_piano.wav");
 }
 void MenuLayer::unloadResources()
 {

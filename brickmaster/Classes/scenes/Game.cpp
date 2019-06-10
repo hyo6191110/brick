@@ -1,8 +1,5 @@
 #include "Game.h"
-USING_NS_CC;
 
-#include"SimpleAudioEngine.h"
-using namespace CocosDenshion;
 
 Scene*  Game::createScene(int life, int level)
 {
@@ -22,6 +19,7 @@ Scene*  Game::createScene(int life, int level)
 
 void Game::Closethis(Ref* pSender)
 {
+	SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	this->unscheduleAllCallbacks();
     //SpriteFrameCache::getInstance()->removeSpriteFrames();
     //SpriteFrameCache::getInstance->destroyInstance();
@@ -63,6 +61,7 @@ void Game::update(float delta)
 
 void Game::gameOver(bool isWinMode, bool isWin)
 {	
+	SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	if (isGameOver == true)
 		return;
 	isGameOver = true;
@@ -88,7 +87,19 @@ void Game::gameOver(bool isWinMode, bool isWin)
 		show->setColor(Color3B::BLACK);
 		addChild(show);
 		if (!isWin)
+		{
+			PLAY_EFFECT("effect/lose.wav");
 			show->setString("You lose!");
+		}
+		else
+		{
+			PLAY_EFFECT("effect/win.wav");
+		}
+			
+	}
+	else
+	{
+		PLAY_EFFECT("effect/win.wav");
 	}
 	auto shows = Label::createWithTTF(StringUtils::format("Score:%d", _score),
 		"fonts\\BRITANIC.ttf", 72, Size::ZERO, cocos2d::TextHAlignment::CENTER);
@@ -110,8 +121,10 @@ void Game::createPlayerSide(int side, Plate*& player, Deadzone*& deadzone)
 {
 	deadzone = Deadzone::create("game\\deadzone.png");
 	deadzone->setTextureRect(Rect(0, 0, _gamescreenWidth, 20));
-
-	player = Plate::create(UserDefault::getInstance()->getStringForKey("plate_texture","game/defender_0.png"));
+	if (side == 1)
+		player = Plate::create(UserDefault::getInstance()->getStringForKey("plate_texture", "game/defender_0.png"));
+	else
+		player = Plate::create(StringUtils::format("game/defender_%d.png", UserDefault::getInstance()->getIntegerForKey("default_difficulty",2)));
 
 	float x= _centerX, 
 		  y_deadzone=deadzone->getContentSize().height/2,
@@ -209,7 +222,7 @@ void Game::createBricksFromFile(const std::string& fileName)
 	}
 }
 
-void Game::createBrickItem(float x, float y, int side)
+void Game::createBrickItem(float x, float y, int side,bool createdbynormalbrick)
 {
 	float y_destination,distance;
 	if (side == 1)
@@ -239,6 +252,8 @@ bool Game::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	PLAY_BGM("bgm/bgm_piano.wav");
+	
 	auto bg = Sprite::create(UserDefault::getInstance()->getStringForKey("background_texture","background/background_1.jpg" ));
 	bg->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	addChild(bg);
@@ -299,6 +314,7 @@ bool Game::init()
 	listener2->onKeyPressed = CC_CALLBACK_2(Game::onKeyPressed, this);
 	listener2->onKeyReleased = CC_CALLBACK_2(Game::onKeyReleased, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener2, this);
+
 	return true;
 }
 
@@ -307,7 +323,7 @@ void Game::createHUD()
 {
 	//显示数值数据
 	float x = _gamescreen.getMinX() / 2;
-	float y = _gamescreen.getMaxY();\
+	float y = _gamescreen.getMaxY();
 
 	std::string level_str;
 	if (_level > 10000)
@@ -477,6 +493,7 @@ bool Game::onContactBegin(PhysicsContact& contact)
 		{
 			auto ball= dynamic_cast<Ball*>(SA);
 			auto brick = dynamic_cast<Brick*>(SB);
+			
 			if (!brick->isunbreakable())
 			{
 				brick->damaged();
@@ -492,8 +509,23 @@ bool Game::onContactBegin(PhysicsContact& contact)
 						int side = 1;
 						if (ball->getPlateBelongto()->getPositionY() > 500)
 							side = 2;
-						createBrickItem(brick->getPositionX(), brick->getPositionY(),side);
+						createBrickItem(brick->getPositionX(), brick->getPositionY(), side);
 					}
+					else
+					{
+						if (normal_brick_dropitem)
+						{
+							int seed = random() % 100;
+							if (seed >= 90)
+							{
+								int side = 1;
+								if (ball->getPlateBelongto()->getPositionY() > 500)
+									side = 2;
+								createBrickItem(brick->getPositionX(), brick->getPositionY(), side,true);
+							}
+						}
+					}
+		
 					if (brick->isbrickcount())
 					{
 						brickcount--;
@@ -722,3 +754,46 @@ void Game::writeScoreToUserData()
 	UserDefault::getInstance()->setIntegerForKey("classic_average",average );
 	UserDefault::getInstance()->setIntegerForKey("classic_maxscore",maxscore );
 }
+
+/*void Game::updateEffect(float delta)
+{
+	switch (effecttype)
+	{
+	case(BallDeadzone):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/ball_deadzone.wav");
+		break;
+	}
+	case(BallPlate):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/ball_wall.wav");
+		effecttype = NoEffect;
+		break;
+	}
+	case(BrickDamage):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/brick_damage.wav");
+		effecttype = NoEffect;
+		break;
+	}
+	case(BrickDestroy):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/brick_destroy.wav");
+		effecttype = NoEffect;
+		break;
+	}
+	case(NewItem):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/newItem.wav", false, 1.0f, 1.0f, 1.0f);
+		effecttype = NoEffect;
+		break;
+	}
+	case(GetItem):
+	{
+		SimpleAudioEngine::getInstance()->playEffect("effect/getItem.wav", false, 1.0f, 1.0f, 1.0f);
+		effecttype = NoEffect;
+		break;
+	}
+	default:break;
+	}
+}*/

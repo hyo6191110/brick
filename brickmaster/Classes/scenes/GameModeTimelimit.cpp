@@ -40,7 +40,7 @@ void GameModeTimelimit::updateMode()
 		}
 		balltodestroy = nullptr;
 	}
-	if (_time <= 0)
+	if (_time <= 0&&isGameOver==false)
 	{
 		gameOver(false);
 		this->unschedule(schedule_selector(GameModeTimelimit::updateTime));
