@@ -1,10 +1,14 @@
 # brickmaster
 C++大项目：打砖块多人版
 # 程序架构
-1.游戏主场景放在scene文件夹\n
+1.游戏主场景放在scene文件夹
+
 2.板、球、砖块等游戏sprite类放在model文件夹
+
 3.util文件夹放封装的一些功能
+
 4.所有资源，包括图片、音乐、关卡配置文件统一放在Resource下，userdefault.xml保存路径在C盘。
+
 # 开发流程
 1.学习cocos2d-x的基础功能，完成一个demo。*OK*
 2.构造程序构架，完成交互界面。*OK*
