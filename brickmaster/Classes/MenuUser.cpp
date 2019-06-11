@@ -22,7 +22,7 @@ bool MenuUser::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto bg = Sprite::create("background_menu_02.png");
+	auto bg = Sprite::create("background/background_menu_02.png");
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(bg);
 
@@ -49,14 +49,14 @@ bool MenuUser::init()
 		CC_CALLBACK_1(MenuUser::clearTimelimit, this));
 	cleartimelimit->setPosition(1350, 80);
 
-	auto modeprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(MenuUser::prevMode, this));
+	auto modeprev = MenuItemImage::create("ui/button_next_r.png", "ui/button_next_selected_r.png", CC_CALLBACK_1(MenuUser::prevMode, this));
 	modeprev->setPosition(50, 800);
-	auto modenext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(MenuUser::nextMode, this));
+	auto modenext = MenuItemImage::create("ui/button_next.png", "ui/button_next_selected.png", CC_CALLBACK_1(MenuUser::nextMode, this));
 	modenext->setPosition(550, 800);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(MenuUser::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;

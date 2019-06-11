@@ -18,17 +18,17 @@ void UserLevelSelection::createLevelSelection(float y_start)
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	_currentlevel = 10001;
+	_currentlevel = 10000+UserDefault::getInstance()->getIntegerForKey("user_select_level",1);
 	_showlevel->setString(StringUtils::format("Level\nUser\n%d", _currentlevel - 10000));
+
 	_show_info=Label::createWithTTF("Existed File", "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
-	std::string filename = StringUtils::format("levels/user_levels/level_%d.json", _currentlevel - 10000);
-	ifstream infile(filename);
-	if (!infile)
+	std::string filename = FileUtils::getInstance()->getWritablePath() + StringUtils::format("user_level_%d.json", _currentlevel - 10000);
+	if (!FileUtils::getInstance()->isFileExist(filename))
 		_show_info->setString("No File");
-	infile.close();
+
 	auto book = Sprite::create("menu/menu_book.png");
-	auto levelprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(UserLevelSelection::minuslevel, this));
-	auto levelnext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(UserLevelSelection::addlevel, this));
+	auto levelprev = MenuItemImage::create("ui/button_next_r.png", "ui/button_next_selected_r.png", CC_CALLBACK_1(UserLevelSelection::minuslevel, this));
+	auto levelnext = MenuItemImage::create("ui/button_next.png", "ui/button_next_selected.png", CC_CALLBACK_1(UserLevelSelection::addlevel, this));
 	float y1 = book->getContentSize().height / 2;
 	float y2 = 100;
 	float x3 = visibleSize.width / 2;
@@ -51,9 +51,8 @@ void UserLevelSelection::addlevel(Ref* pSender)
 {
 	_currentlevel++;
 	_showlevel->setString(StringUtils::format("Level\nUser\n%d", _currentlevel - 10000));
-	std::string filename = StringUtils::format("levels/user_levels/level_%d.json", _currentlevel - 10000);
-	ifstream infile(filename);
-	if (infile)
+	std::string filename = FileUtils::getInstance()->getWritablePath() + StringUtils::format("user_level_%d.json", _currentlevel - 10000);
+	if (FileUtils::getInstance()->isFileExist(filename))
 	{
 		_show_info->setString("Existed File");
 	}
@@ -61,7 +60,7 @@ void UserLevelSelection::addlevel(Ref* pSender)
 	{
 		_show_info->setString("No File");
 	}
-	infile.close();
+	UserDefault::getInstance()->setIntegerForKey("user_select_level", _currentlevel - 10000);
 }
 void UserLevelSelection::minuslevel(Ref* pSender)
 {
@@ -69,9 +68,8 @@ void UserLevelSelection::minuslevel(Ref* pSender)
 	{
 		_currentlevel--;
 		_showlevel->setString(StringUtils::format("Level\nUser\n%d", _currentlevel - 10000));
-		std::string filename = StringUtils::format("levels/user_levels/level_%d.json", _currentlevel - 10000);
-		ifstream infile(filename);
-		if (infile)
+		std::string filename = FileUtils::getInstance()->getWritablePath() + StringUtils::format("user_level_%d.json", _currentlevel - 10000);
+		if (FileUtils::getInstance()->isFileExist(filename))
 		{
 			_show_info->setString("Existed File");
 		}
@@ -79,7 +77,7 @@ void UserLevelSelection::minuslevel(Ref* pSender)
 		{
 			_show_info->setString("No File");
 		}
-		infile.close();
+		UserDefault::getInstance()->setIntegerForKey("user_select_level", _currentlevel - 10000);
 	}
 
 

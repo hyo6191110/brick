@@ -7,15 +7,15 @@ using namespace std;
 bool getAllBrickWithFile(const std::string& fileName, std::vector<BrickData*>& vec)
 {
 	rapidjson::Document document;
-	//string content = FileUtils::getInstance()->getStringFromFile(fileName);
-	//document.Parse<0>(content.c_str());
-	ifstream infile(fileName);
+	string content = FileUtils::getInstance()->getStringFromFile(fileName);
+	document.Parse<0>(content.c_str());
+	/*ifstream infile(fileName);
 	ostringstream content;
 	char ch;
 	while (content&&infile.get(ch))
 		content.put(ch);
 	infile.close();
-	document.Parse<0>(content.str().c_str());
+	document.Parse<0>(content.str().c_str());*/
 
 	if (document.HasParseError())
 	{

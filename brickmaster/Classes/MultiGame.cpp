@@ -34,8 +34,8 @@ bool MultiGame::init()
 	MsgItem->setPosition(visibleSize.width / 2, visibleSize.height / 2 - 100);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(MultiGame::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;

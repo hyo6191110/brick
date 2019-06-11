@@ -55,8 +55,8 @@ bool SingleGame::init()
 	this->addChild(bg);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(SingleGame::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;

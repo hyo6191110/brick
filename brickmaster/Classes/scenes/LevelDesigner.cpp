@@ -16,6 +16,7 @@ void LevelDesigner::Closethis(Ref* pSender)
 	//SpriteFrameCache::getInstance()->removeSpriteFrames();
 	//SpriteFrameCache::getInstance->destroyInstance();
 	//this->_eventDispatcher->removeAllEventListeners();
+	UserDefault::getInstance()->setIntegerForKey("user_design_level", _levelNum);
 	Director::getInstance()->popScene();
 
 }
@@ -32,7 +33,7 @@ void LevelDesigner::addbrick(int type, float x, float y)
 void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 {
 	bool rewrite=false;
-	if (FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/"+_fileName))
+	if (FileUtils::getInstance()->isFileExist(FileUtils::getInstance()->getWritablePath()+_fileName))
 	{
 		_showsavelog->setString("Rewrite:"+_fileName);
 		rewrite = true;
@@ -53,9 +54,12 @@ void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 	StringBuffer buffer;
 	PrettyWriter<StringBuffer> pretty_writer(buffer);
 	document.Accept(pretty_writer);
-	ofstream outfile("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/"+ _fileName);
+
+	string fullPath = FileUtils::getInstance()->getWritablePath()+_fileName;
+	ofstream outfile(fullPath);
 	outfile << buffer.GetString();
 	outfile.close();
+
 	if(rewrite==false)
 	    _showsavelog->setString("Successfully saved");
 	else
@@ -63,7 +67,7 @@ void LevelDesigner::WritetoFile(cocos2d::Ref* pSender)
 }
 void LevelDesigner::ReadfromFile(cocos2d::Ref* pSender)
 {
-	if (!FileUtils::getInstance()->isFileExist("D:/1/cocos_project/brickmaster/Resources/levels/user_levels/" + _fileName))
+	if (!FileUtils::getInstance()->isFileExist(FileUtils::getInstance()->getWritablePath() + _fileName))
 	{
 		_showsavelog->setString("No file,try another name");
 		return;
@@ -75,7 +79,7 @@ void LevelDesigner::ReadfromFile(cocos2d::Ref* pSender)
 	vec_brick.clear();
 
 	vector<BrickData*> vec_data;
-	getAllBrickWithFile("levels/user_levels/"+_fileName,vec_data);
+	getAllBrickWithFile(FileUtils::getInstance()->getWritablePath() +_fileName,vec_data);
 	for (auto it : vec_data)
 	{
 		addbrick(it->getType(),it->getX(),it->getY());
@@ -89,7 +93,7 @@ bool LevelDesigner::init()
 	{
 		return false;
 	}
-
+	
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -110,7 +114,7 @@ bool LevelDesigner::init()
 	this->addChild(area);
 	_designarea = area->getBoundingBox();
 
-	_fileName = StringUtils::format("level_%d.json", _levelNum);
+	_fileName = StringUtils::format("user_level_%d.json", _levelNum);
 	_showfileName = Label::createWithTTF(StringUtils::format("level_%d", _levelNum), "fonts\\BRITANIC.ttf", 36, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	_showfileName->setPosition(info->getContentSize().width / 2, 300);
 	this->addChild(_showfileName);
@@ -121,7 +125,7 @@ bool LevelDesigner::init()
 	auto add= Label::createWithTTF("+", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	auto addItem = MenuItemLabel::create(add, [=](Ref* pSender){
 		_levelNum++;
-		_fileName = StringUtils::format("level_%d.json", _levelNum);
+		_fileName = StringUtils::format("user_level_%d.json", _levelNum);
 		_showfileName->setString(StringUtils::format("level_%d", _levelNum));
 	});
 	addItem->setPosition(250, 300);
@@ -129,14 +133,14 @@ bool LevelDesigner::init()
 	auto minusItem = MenuItemLabel::create(minus, [=](Ref* pSender) {
 		if (_levelNum == 1)return;
 		_levelNum--;
-		_fileName = StringUtils::format("level_%d.json", _levelNum);
+		_fileName = StringUtils::format("user_level_%d.json", _levelNum);
 		_showfileName->setString(StringUtils::format("level_%d", _levelNum));
 	});
 	minusItem->setPosition(50, 300);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(LevelDesigner::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;

@@ -260,8 +260,8 @@ bool Game::init()
 
 	//1.创建退出按钮
 	auto closeItem = MenuItemImage::create(
-		"back.png",
-		"back_s.png",
+		"ui/back.png",
+		"ui/back_s.png",
 		CC_CALLBACK_1(Game::Closethis, this));
 	float x = origin.x + closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;
@@ -384,9 +384,9 @@ void Game::initAfter()
 {
 	std::string LevelFile;
 	if(_level>10000)
-		LevelFile = StringUtils::format("levels/user_levels/level_%d.json", _level-10000);
+		LevelFile = FileUtils::getInstance()->getWritablePath() + StringUtils::format("user_level_%d.json", _level-10000);
 	else
-	    LevelFile = StringUtils::format("levels/default_levels/level_%d.json", _level);
+	    LevelFile = StringUtils::format("levels/level_%d.json", _level);
 	createBricksFromFile(LevelFile);
 	allbrickcount = brickcount;
 

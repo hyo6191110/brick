@@ -20,13 +20,13 @@ bool MenuSettings::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto bg = Sprite::create("background_menu_02.png");
+	auto bg = Sprite::create("background/background_menu_02.png");
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(bg);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(MenuSettings::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;

@@ -30,7 +30,7 @@ private:
 	float _funcgapWidth=90, _funcgapHeight=80;
 private:
 	std::vector<Brick*> vec_brick;
-	int _levelNum=1;
+	int _levelNum=cocos2d::UserDefault::getInstance()->getIntegerForKey("user_design_level",1);
 	std::string _fileName;
 	cocos2d::Label* _showfileName;
 	cocos2d::Label* _showsavelog;

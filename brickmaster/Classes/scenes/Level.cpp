@@ -1,7 +1,4 @@
 #include "Level.h"
-USING_NS_CC;
-#include "ui/CocosGUI.h"
-using namespace ui;
 #include "Game.h"
 #include "GameModePong.h"
 #include "GameModeTimelimit.h"
@@ -176,13 +173,13 @@ bool Level::init()
 	_showtime = Label::createWithTTF(time_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 	_showlevel= Label::createWithTTF(level_str, "fonts\\BOD_R.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
 
-	auto modeprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(Level::minusmode, this));
-	auto modenext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(Level::addmode, this));
-	auto lifeprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(Level::minuslife, this));
-	auto lifenext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(Level::addlife, this));
-	auto timeprev = MenuItemImage::create("button_next_r.png", "button_next_selected_r.png", CC_CALLBACK_1(Level::minustime, this));
-	auto timenext = MenuItemImage::create("button_next.png", "button_next_selected.png", CC_CALLBACK_1(Level::addtime, this));
-	auto startgame = MenuItemImage::create("button_play.png", "button_play_s.png", CC_CALLBACK_1(Level::openlevel, this));
+	auto modeprev = MenuItemImage::create("ui/button_next_r.png", "ui/button_next_selected_r.png", CC_CALLBACK_1(Level::minusmode, this));
+	auto modenext = MenuItemImage::create("ui/button_next.png", "ui/button_next_selected.png", CC_CALLBACK_1(Level::addmode, this));
+	auto lifeprev = MenuItemImage::create("ui/button_next_r.png", "ui/button_next_selected_r.png", CC_CALLBACK_1(Level::minuslife, this));
+	auto lifenext = MenuItemImage::create("ui/button_next.png", "ui/button_next_selected.png", CC_CALLBACK_1(Level::addlife, this));
+	auto timeprev = MenuItemImage::create("ui/button_next_r.png", "ui/button_next_selected_r.png", CC_CALLBACK_1(Level::minustime, this));
+	auto timenext = MenuItemImage::create("ui/button_next.png", "ui/button_next_selected.png", CC_CALLBACK_1(Level::addtime, this));
+	auto startgame = MenuItemImage::create("ui/button_play.png", "ui/button_play_s.png", CC_CALLBACK_1(Level::openlevel, this));
 
 	float x1 = 100;
 	float x2 = x1 + 100 + modeprev->getContentSize().width / 2;
@@ -261,8 +258,8 @@ bool Level::init()
 	this->addChild(_showdifficulty);
 
 	auto closeItem = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"ui/CloseNormal.png",
+		"ui/CloseSelected.png",
 		CC_CALLBACK_1(Level::Closethis, this));
 	float x = origin.x + visibleSize.width - closeItem->getContentSize().width / 2;
 	float y = origin.y + closeItem->getContentSize().height / 2;
@@ -291,7 +288,7 @@ void Level::createLevelSelection(float y_start)
 		float ly = y_start - 150 - (y_start - 150) / 3 * (i / 6);
 		num->setPosition(lx, ly);
 		this->addChild(num, 2);
-		auto imagename = "level_blue.png";
+		auto imagename = "ui/level_blue.png";
 		auto level = Sprite::create(imagename);
 		level->setTag(i + 1);
 		level->setPosition(lx, ly);
