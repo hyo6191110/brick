@@ -1,7 +1,6 @@
 #include "MultiGame.h"
 USING_NS_CC;
 
-
 Scene* MultiGame::createScene()
 {
 	auto scene = Scene::create();
@@ -29,9 +28,15 @@ bool MultiGame::init()
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	auto bg = Sprite::create("background/background_menu_02.png");
+	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	this->addChild(bg);
 
 	auto MsgItem=MenuItemLabel::create(Label::createWithTTF("Send Message","fonts/BOD_R.ttf",56), CC_CALLBACK_1(MultiGame::sendMsg, this));
 	MsgItem->setPosition(visibleSize.width / 2, visibleSize.height / 2 - 100);
+
+	auto StartItem = MenuItemLabel::create(Label::createWithTTF("Start", "fonts/BOD_R.ttf", 56), CC_CALLBACK_1(MultiGame::startGame, this));
+	StartItem->setPosition(visibleSize.width / 2, visibleSize.height / 2 - 300);
 
 	auto closeItem = MenuItemImage::create(
 		"ui/CloseNormal.png",
@@ -41,7 +46,7 @@ bool MultiGame::init()
 	float y = origin.y + closeItem->getContentSize().height / 2;
 	closeItem->setPosition(Vec2(x, y));
 
-	auto menu = Menu::create(closeItem,MsgItem, NULL);
+	auto menu = Menu::create(closeItem,MsgItem,StartItem, NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 
@@ -49,49 +54,17 @@ bool MultiGame::init()
 	_show_info->setPosition(visibleSize.width / 2, visibleSize.height / 2 + 100);
 	addChild(_show_info);
 
-	_sioclient = SocketIO::connect("http://localhost:3000/", *this);
-	_sioclient->setTag("Client1");
-	_sioclient->on("callClientEvent", CC_CALLBACK_2(MultiGame::callClientEvent, this));
 
 	return true;
 }
-
-void MultiGame::sendMsg(cocos2d::Ref* pSender)
+void MultiGame::sendMsg(Ref* pSender)
 {
-	if (_sioclient)
-	{
-		_sioclient->send("Hello Socket.io!");
-		_sioclient->emit("callServerEvent", "{\"message\":\"Hello Server.\"}");
-	}
+
 }
 
-void MultiGame::onConnect(SIOClient* client)
+void MultiGame::startGame(Ref* pSender)
 {
-	_show_info->setString(StringUtils::format("%s connected", client->getTag()));
-}
-void MultiGame::onMessage(SIOClient* client, const std::string& data)
-{
-	_show_info->setString(StringUtils::format("%s received message:%s", client->getTag(),data.c_str()));
-}
-void MultiGame::onClose(SIOClient* client)
-{
-	_show_info->setString(StringUtils::format("%s closed", client->getTag()));
-	if (client == _sioclient)
-		_sioclient = nullptr;
-}
-void MultiGame::onError(SIOClient* client, const std::string& data)
-{
-	_show_info->setString(StringUtils::format("%s received error:%s", client->getTag(), data.c_str()));
+	//auto scene = WebGame::createScene(9, 90);
+	//Director::getInstance()->pushScene(scene);
 }
 
-void MultiGame::callClientEvent(SIOClient* client, const std::string& data)
-{
-	_show_info->setString(StringUtils::format("%s server callback:%s", client->getTag(), data.c_str()));
-}
-
-void MultiGame::cleanup()
-{
-	Layer::cleanup();
-	if (_sioclient)
-		_sioclient->disconnect();
-}

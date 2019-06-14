@@ -1,6 +1,5 @@
 #include "Game.h"
 
-
 Scene*  Game::createScene(int life, int level)
 {
 	auto scene = Scene::createWithPhysics();
@@ -24,12 +23,12 @@ void Game::Closethis(Ref* pSender)
     //SpriteFrameCache::getInstance()->removeSpriteFrames();
     //SpriteFrameCache::getInstance->destroyInstance();
     //this->_eventDispatcher->removeAllEventListeners();
+	closeOthers();
     Director::getInstance()->popScene();
-
 }
+
 void Game::update(float delta)
 {
-	//1.通用
 	//道具与玩家碰撞检测
 	collisionDetection(_player1);
 	//更新球速
@@ -54,9 +53,8 @@ void Game::update(float delta)
 		{
 			_player1->getPhysicsBody()->setVelocity(Vec2::ZERO);
 		}
-	//2.针对不同模式的不同逻辑判断
-	updateMode();
-				
+	//针对不同模式的不同逻辑判断
+	updateMode();		
 }
 
 void Game::gameOver(bool isWinMode, bool isWin)
@@ -334,7 +332,7 @@ void Game::createHUD()
 	_showlevel->setPosition(x, y - 75);
 	this->addChild(_showlevel);
 
-	auto tscore = Label::createWithTTF("Score:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	tscore = Label::createWithTTF("Score:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
 	tscore->setColor(Color3B::BLACK);
 	auto str2 = StringUtils::format("%d", _score);
 	_showscore = Label::createWithTTF(str2, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
@@ -343,7 +341,7 @@ void Game::createHUD()
 	this->addChild(tscore);
 	this->addChild(_showscore);
 
-	auto tlife = Label::createWithTTF("Life:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	tlife = Label::createWithTTF("Life:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
 	tlife->setColor(Color3B::BLACK);
 	auto str = StringUtils::format("%d", _life);
 	_showlife = Label::createWithTTF(str, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
@@ -608,7 +606,9 @@ void Game::collisionDetection(Plate* player)
 				if (islife)
 				{
 					player->recover();
-					_showlife->setString(StringUtils::format("%d", player->getLife()));
+					if (player == _player1)
+						_showlife->setString(StringUtils::format("%d", player->getLife()));
+					
 					LOG_INFO("Life Recover:+1");
 					break;
 				}
@@ -755,45 +755,8 @@ void Game::writeScoreToUserData()
 	UserDefault::getInstance()->setIntegerForKey("classic_maxscore",maxscore );
 }
 
-/*void Game::updateEffect(float delta)
+
+void Game::closeOthers()
 {
-	switch (effecttype)
-	{
-	case(BallDeadzone):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/ball_deadzone.wav");
-		break;
-	}
-	case(BallPlate):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/ball_wall.wav");
-		effecttype = NoEffect;
-		break;
-	}
-	case(BrickDamage):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/brick_damage.wav");
-		effecttype = NoEffect;
-		break;
-	}
-	case(BrickDestroy):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/brick_destroy.wav");
-		effecttype = NoEffect;
-		break;
-	}
-	case(NewItem):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/newItem.wav", false, 1.0f, 1.0f, 1.0f);
-		effecttype = NoEffect;
-		break;
-	}
-	case(GetItem):
-	{
-		SimpleAudioEngine::getInstance()->playEffect("effect/getItem.wav", false, 1.0f, 1.0f, 1.0f);
-		effecttype = NoEffect;
-		break;
-	}
-	default:break;
-	}
-}*/
+
+}

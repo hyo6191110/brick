@@ -51,7 +51,7 @@ void GameModeTimelimit::createHUDMode()
 	float x = _gamescreen.getMinX() / 2;
 	float y = _gamescreen.getMaxY();
 
-	auto ttime = Label::createWithTTF("Time:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
+	ttime = Label::createWithTTF("Time:", "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::LEFT);
 	ttime->setColor(Color3B::BLACK);
 	auto str = StringUtils::format("%d", _time);
 	_showtime = Label::createWithTTF(str, "fonts\\BRITANIC.ttf", 48, Size::ZERO, cocos2d::TextHAlignment::CENTER);
@@ -61,6 +61,8 @@ void GameModeTimelimit::createHUDMode()
 	this->addChild(_showtime);
 
 	_showlife->setString("Unlimited");
+
+	createHUDforWeb();
 }
 void GameModeTimelimit::updateTime(float delta)
 {
@@ -178,4 +180,9 @@ void GameModeTimelimit::writeScoreToUserData()
 	UserDefault::getInstance()->setIntegerForKey("timelimit_played", time);
 	UserDefault::getInstance()->setIntegerForKey("timelimit_average", average);
 	UserDefault::getInstance()->setIntegerForKey("timelimit_maxscore", maxscore);
+}
+
+void GameModeTimelimit::createHUDforWeb()
+{
+
 }

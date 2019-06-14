@@ -9,6 +9,7 @@ protected:
 	int _time;
 	int _totaltime;
 	int _generatetime = 10;
+	cocos2d::Label* ttime;
 	cocos2d::Label* _showtime;
 	std::vector<cocos2d::Vec2> V_destroyedbricks;
 public:
@@ -22,6 +23,8 @@ public:
 	void updateTime(float delta);
 	void generateBricks();
 	CREATE_FUNC(GameModeTimelimit);
+
+	virtual void createHUDforWeb() ;
 };
 
 #endif

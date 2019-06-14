@@ -71,11 +71,14 @@ public:
 	virtual void recoverTime();
 	//将得分数写入用户文件
 	virtual void writeScoreToUserData();
+	virtual void closeOthers();
 protected:
 	//分值数据及显示
 	int _level=1;
 	int _life;
 	int _score = 0;
+	cocos2d::Label* tlife;
+	cocos2d::Label* tscore;
 	cocos2d::Label* _showlife;
 	cocos2d::Label* _showscore;
 	cocos2d::Label* _showlevel;
